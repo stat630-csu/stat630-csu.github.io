@@ -1,0 +1,98 @@
+---
+title: "STAT630: Advanced Statistical Data Analysis"
+author: "Fall 2023"
+date: "http://stat630-csu.github.io"
+output:
+  pagedown::html_paged:
+    # change to true for a self-contained document, but it'll be a litte slower for Pandoc to render
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: false
+---
+
+Dr. Andee Kaplan  
+Lectures: TTH 11am - 12:15pm Weber 223H 
+Office Hours: TH 1:30pm - 3:30pm Statistics Building 208 or by appointment  
+andee.kaplan@colostate.edu
+
+**Grader/TA**: Wenqin Du  
+wenqin.du@colostate.edu
+
+## Catalog Description
+
+Advanced statistical modeling techniques and data analysis methods, including likelihood-based methods, M-estimation, bootstrap and EM algorithm, and other advanced topics. For example, Jackknife, permutation tests, and nonparametric statistics.
+
+## Course Objectives
+
+The aim of this course is to provide an overview of many statistical inference methods in modern statistical data analysis.
+
+## Learning Outcomes
+
+The students will be able to
+
+1. implement likelihood-based methods to modern data analysis problems.
+2. implement computation-based methods, e.g., jackknife, bootstrap, for statistical inference.
+3. test statistical hypotheses using permutation and rank tests.
+4. use nonparametric techniques for data analysis.
+5. apply statistical inference tools, e.g., estimating equations, to evaluate validity and applicability
+of data analysis results.
+6. implement statistical inference tools in their future work/research.
+
+## COVID-19
+
+**Important information for students: All students are directed to report any COVID-19 symptoms to the university immediately, as well as exposures or positive test results from a medical provider or home test.** 
+
+If you suspect you have symptoms, or if you know you have been exposed to a positive person or have tested positive for COVID, (even with a home test), you are directed to fill out the COVID Reporter (https://covid.colostate.edu/reporter/). If you know or believe you have been exposed, including living with someone known to be COVID positive, or are symptomatic, it is important for the health of yourself and others that you complete the online COVID Reporter. Do not ask your instructor to report for you. If you do not have internet access to fill out the online COVID-19 Reporter, please call (970) 491-4600. You may also report concerns in your academic or living spaces regarding COVID exposures through the COVID Reporter. You will not be penalized in any way for reporting. When you complete the COVID Reporter for any reason, the CSU Public Health office is notified. Students who report symptoms or a positive antigen test through the COVID Reporter may be directed to get a PCR test through the CSU Health Network's medical services for students.
+
+For the latest information about the University's COVID resources and information, please visit the **CSU COVID-19 site**: https://covid.colostate.edu/.
+
+## Prerequisites
+
+STAT 530, 620, 640.
+
+## Texts
+
+*Essential Statistical Inference: Theory and Methods*, Dennis D Boos and L. A Stefanski, Springer, 2013.
+
+Optional references:  
+*All of Statistics: A Concise Course in Statistical Inference*, Larry Wasserman, Springer, 2004.  
+*Bayesian and Frequentist Regression Methods*, Jon Wakefield, Springer, 2013.
+
+## Computing
+
+Students are expected to have knowledge of and have access to `R`. `R` is available from http://cran.r-project.org/ and is free. We may use some packages available from the R website.
+
+## Classwork and Grading
+
+**Homework (50%)** Homework will be assigned weekly. All homework assignments are due at **4pm on Fridays**. Each homework assignment will receive equal weight in the final grade. Late work is not accepted unless we have talked about it before the due date.
+
+**Midterm (25%)** There will be one midterm exam on October 19, 2023 (subject to change). 
+
+**Final Exam (25%)** 
+
+A pdf of your homework will need to be turned in to https://canvas.colostate.edu.
+
+Exam format TBD.
+
+Any homework or exam grading dispute must be submitted in writing to me within one week after the work is returned.
+
+## Policy Regarding Academic Honesty
+
+Statisticians need to have high ethical standards. Thus, I expect each of you to hold high ethical standards and to act with academic integrity in this class. Academic dishonesty will not be tolerated. Students are reminded of the honor code:
+
+ > As a student at Colorado State University, I recognize my active role in building a Campus of Character. This includes my commitment to honesty, integrity, and responsibility within the campus community. As such, I will refrain from acts of academic misconduct.
+
+## Support Services Available
+
+[**CSU COVID-19 Recovery Page**](https://covidrecovery.colostate.edu) On our road to recovery during these unprecedented times, Colorado State University is committed to the health of our students, faculty and staff, as well as to the health of our university and our ability to continue to empower our community through our land-grant mission of academics, research and outreach.
+
+**CSU Health Network Counseling Services** A variety of services are offered (151 W. Lake St., Drop-in hours: Monday-Friday 9am-4pm). If you are having difficulty coping, are feeling depressed, or need other psychological assistance, please contact the counseling center.
+
+**CSU Disability Center** Located in the TILT building. Students with both permanent and temporary limitations and health conditions (physical and mental health) are eligible for support. If you need specific accommodations in this class, please meet with me outside of class to discuss your needs as early in the class as possible.
+
+**CSU TILT** The Institute for Learning and Teaching has programs to help students improve their study habits, reduce test anxiety, learn about academic integrity, and more.
+
+## Disclaimer
+
+I reserve the right to make amendments to the syllabus and the schedule throughout the semester. Any updates will be posted on the class website and announced via e-mail and in class.
+
