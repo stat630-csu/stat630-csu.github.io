@@ -1,0 +1,45 @@
+---
+title: "STAT630 - Homework 1"
+author: "Your Name"
+output: pdf_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+## Some useful packages
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+1. A beta distribution has pdf
+    
+    $$
+    f(y; \alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha) \Gamma(\beta)} y^{\alpha - 1} (1 - y)^{\beta - 1}, \quad \text{ for } 0 \le y \le 1, \alpha > 0, \beta > 0.
+    $$
+    
+    We will investigate maximum likelihood estimation for the beta distribution. To make this easier, for now we will assume $\beta = 3$, making a single parameter density
+    
+    $$
+    f(y; \alpha, \beta) = \frac{\Gamma(\alpha + 3)}{2\Gamma(\alpha)} y^{\alpha - 1} (1 - y)^{2}, \quad \text{ for } 0 \le y \le 1, \alpha > 0.
+    $$
+    
+    a) To get an idea of the density, plot it for several dfferent values of $\alpha$.
+    b) Generate a random sample of size $n = 30$ from this distribution when $\alpha = 4$. Create a function in R which takes a value for $\alpha$ and evaluates the log-likelihood for this data.Choose a reasonable interval for values of $\alpha$ and plot the likelihood function for this random sample.
+    c) Numerically find $\hat{\alpha}_{\text{MLE}}$. You will need to use a numerical optimizer like `nlm`, or `optimize`. Try different starting values for $\alpha$ within the optimization to see how robust this numerical optimization is.
+    d) Your optimization method should have an option to return a numerically calculated hessian at the optimum. Use this and the asymptotic properties of MLE's to construct an approximate 95% confidence interval for $\alpha$. Does your confidence interval include the true value of the parameter? (Note: we haven't yet talked about how MLE's are asymptotically normal in STAT 630 yet, but you know this from STAT 530.)
+    e) To illustrate how the likelihood is a random function, generate 10 different samples of size $n = 30$ and store these samples. Plot the likelihood function for each of these 10 samples (as you did in part(b)) all on one plot. (Colors are nice!) Find $\hat{\alpha}_{\text{MLE}}$ for each of these 10 samples and indicate the MLE's in your plot as well. Calculate the approximate 95% confidence intervals for each of these 10 samples and draw a line segment to indicate the extent of the confidence interval. If you were to construct a similar plot with sample size of $n = 100$, how would the plot change?
+    f) Now, generate 1000 different samples of size $n = 30$. For each sample, calculate $\hat{\alpha}_{\text{MLE}}$ and and its approximate 95% confidence interval. Make a histogram of the $\hat{\alpha}_{\text{MLE}}$. Comment on the histogram and report the coverage rate of the confidence intervals.
+    
+2. Generate $n = 50$ samples from a beta distribution with $\alpha = 4$ and $\beta = 3$. Create a function in `R` which takes values for $\alpha$ and $\beta$ and which returns the log-likelihood value. Evaluate the function on a grid of values for $\alpha$ and $\beta$. Plot the likelihood surface using a contour plot (see `geom_contour` or `contour` in base). Use `nlm` or `optim` or some other numerical optimizer to find $(\hat{\alpha}_{\text{MLE}},. \hat{\beta}_{\text{MLE}})$. Add this point to your plot. Repeat for several different samples of size $n = 50$. Submit one plot.
+    
+3. (Boos and Stephanski 2.3 parts a) and b)) The Zero-Inflated Poisson (ZIP) model is defined as
+    \begin{align*}
+    P(Y = 0) &= p + (1 - p) \exp(-\lambda) \\
+    P(Y = y) &= (1 - p)\frac{\lambda^y\exp(-\lambda)}{y!}, \quad y = 1, 2, \dots.
+    \end{align*}
+    
+    a) Reparameterize the model by defining $\pi = P(Y = 0) = p + (1 - p) \exp(-\lambda)$. Solve for $p$ in terms of $\lambda$ and $\pi$, and then substitute so that the density depends only on $\lambda$ and $\pi$.
+    b) For an iid sample of size $n$, let $n_0$ be the number of zeroes in the sample. Assuming that the complete data is available, show that the likelihood factors into two pieces and that $\hat{\pi} = n_0 / n$. Also show that the maximum likelihood estimator for $\lambda$ is the solution to a simple nonlinear equation involving $\overline{Y}_+$ (the average of nonzero values).
+    
+    
