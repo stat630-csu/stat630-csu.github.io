@@ -373,43 +373,44 @@ y^{\alpha - 1} (1 - y)^{2}, \quad \text{ for } 0 \le y \le 1, \alpha
 &gt; 0.
 \]</span></p>
 <ol style="list-style-type: lower-alpha">
-<li>To get an idea of the density, plot it for several dfferent values
-of <span class="math inline">\(\alpha\)</span>.</li>
-<li>Generate a random sample of size <span class="math inline">\(n =
-30\)</span> from this distribution when <span class="math inline">\(\alpha = 4\)</span>. Create a function in R which
+<li><strong>[2 pts]</strong> To get an idea of the density, plot it for
+several dfferent values of <span class="math inline">\(\alpha\)</span>.</li>
+<li><strong>[7 pts]</strong> Generate a random sample of size <span class="math inline">\(n = 30\)</span> from this distribution when <span class="math inline">\(\alpha = 4\)</span>. Create a function in R which
 takes a value for <span class="math inline">\(\alpha\)</span> and
-evaluates the log-likelihood for this data.Choose a reasonable interval
+evaluates the log-likelihood for this data. Choose a reasonable interval
 for values of <span class="math inline">\(\alpha\)</span> and plot the
 likelihood function for this random sample.</li>
-<li>Numerically find <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span>. You will need
+<li><strong>[5 pts]</strong> Numerically find <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span>. You will need
 to use a numerical optimizer like <code>nlm</code>, or
 <code>optimize</code>. Try different starting values for <span class="math inline">\(\alpha\)</span> within the optimization to see how
 robust this numerical optimization is.</li>
-<li>Your optimization method should have an option to return a
-numerically calculated hessian at the optimum. Use this and the
-asymptotic properties of MLE’s to construct an approximate 95%
-confidence interval for <span class="math inline">\(\alpha\)</span>.
+<li><strong>[5 pts]</strong> Your optimization method should have an
+option to return a numerically calculated hessian at the optimum. Use
+this and the asymptotic properties of MLE’s to construct an approximate
+95% confidence interval for <span class="math inline">\(\alpha\)</span>.
 Does your confidence interval include the true value of the parameter?
 (Note: we haven’t yet talked about how MLE’s are asymptotically normal
 in STAT 630 yet, but you know this from STAT 530.)</li>
-<li>To illustrate how the likelihood is a random function, generate 10
-different samples of size <span class="math inline">\(n = 30\)</span>
-and store these samples. Plot the likelihood function for each of these
-10 samples (as you did in part(b)) all on one plot. (Colors are nice!)
-Find <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span> for
-each of these 10 samples and indicate the MLE’s in your plot as well.
-Calculate the approximate 95% confidence intervals for each of these 10
-samples and draw a line segment to indicate the extent of the confidence
+<li><strong>[3 pts]</strong> To illustrate how the likelihood is a
+random function, generate 10 different samples of size <span class="math inline">\(n = 30\)</span> and store these samples. Plot the
+likelihood function for each of these 10 samples (as you did in part(b))
+all on one plot. (Colors are nice!) Find <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span> for each of
+these 10 samples and indicate the MLE’s in your plot as well. Calculate
+the approximate 95% confidence intervals for each of these 10 samples
+and draw a line segment to indicate the extent of the confidence
 interval. If you were to construct a similar plot with sample size of
 <span class="math inline">\(n = 100\)</span>, how would the plot
 change?</li>
-<li>Now, generate 1000 different samples of size <span class="math inline">\(n = 30\)</span>. For each sample, calculate <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span> and and its
-approximate 95% confidence interval. Make a histogram of the <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span>. Comment on the
-histogram and report the coverage rate of the confidence intervals.</li>
+<li><strong>[5 pts]</strong> Now, generate 1000 different samples of
+size <span class="math inline">\(n = 30\)</span>. For each sample,
+calculate <span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span>
+and and its approximate 95% confidence interval. Make a histogram of the
+<span class="math inline">\(\hat{\alpha}_{\text{MLE}}\)</span>. Comment
+on the histogram and report the coverage rate of the confidence
+intervals.</li>
 </ol></li>
-<li><p>Generate <span class="math inline">\(n = 50\)</span> samples from
-a beta distribution with <span class="math inline">\(\alpha = 4\)</span>
-and <span class="math inline">\(\beta = 3\)</span>. Create a function in
+<li><p><strong>[12 pts]</strong> Generate <span class="math inline">\(n
+= 50\)</span> samples from a beta distribution with <span class="math inline">\(\alpha = 4\)</span> and <span class="math inline">\(\beta = 3\)</span>. Create a function in
 <code>R</code> which takes values for <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> and which returns the
 log-likelihood value. Evaluate the function on a grid of values for
 <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. Plot the likelihood surface using
@@ -426,13 +427,12 @@ P(Y = y) &amp;= (1 - p)\frac{\lambda^y\exp(-\lambda)}{y!}, \quad y = 1,
 2, \dots.
 \end{align*}\]</span></p>
 <ol style="list-style-type: lower-alpha">
-<li>Reparameterize the model by defining <span class="math inline">\(\pi
-= P(Y = 0) = p + (1 - p) \exp(-\lambda)\)</span>. Solve for <span class="math inline">\(p\)</span> in terms of <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\pi\)</span>, and then substitute so that the
+<li><strong>[5 pts]</strong> Reparameterize the model by defining <span class="math inline">\(\pi = P(Y = 0) = p + (1 - p)
+\exp(-\lambda)\)</span>. Solve for <span class="math inline">\(p\)</span> in terms of <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\pi\)</span>, and then substitute so that the
 density depends only on <span class="math inline">\(\lambda\)</span> and
 <span class="math inline">\(\pi\)</span>.</li>
-<li>For an iid sample of size <span class="math inline">\(n\)</span>,
-let <span class="math inline">\(n_0\)</span> be the number of zeroes in
-the sample. Assuming that the complete data is available, show that the
+<li><strong>[6 pts]</strong> For an iid sample of size <span class="math inline">\(n\)</span>, let <span class="math inline">\(n_0\)</span> be the number of zeroes in the
+sample. Assuming that the complete data is available, show that the
 likelihood factors into two pieces and that <span class="math inline">\(\hat{\pi} = n_0 / n\)</span>. Also show that the
 maximum likelihood estimator for <span class="math inline">\(\lambda\)</span> is the solution to a simple
 nonlinear equation involving <span class="math inline">\(\overline{Y}_+\)</span> (the average of nonzero
