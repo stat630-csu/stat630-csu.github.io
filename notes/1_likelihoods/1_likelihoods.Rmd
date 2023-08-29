@@ -540,10 +540,31 @@ $$
 
 ## Likelihood for Regression Models {.page-break-before}
 
-## Marginal and Conditional Likelihoods
+We will start wil linear regression and then talk about more general models.
 
-## The Maximum Likelihood Estimator and the Information Matrix
+### Linear Model
 
-## Methods for Maximizing the Likelihood
+Consider the familiar linear model
+$$
+Y_i = \boldsymbol x_i^\top \boldsymbol \beta + e_i, \qquad i =1, \dots, n,
+$$
+where $\boldsymbol x_1, \dots, \boldsymbol x_n$ are known nonrandom vectors.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+For likelihood-based estimation, 
+
+$$
+L(\boldsymbol \beta, \sigma | \{Y_i, \boldsymbol x_i\}_{i = 1}^n) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+
+
+
+
+## Marginal and Conditional Likelihoods {.page-break-before}
+
+## The Maximum Likelihood Estimator and the Information Matrix {.page-break-before}
+
 
 
