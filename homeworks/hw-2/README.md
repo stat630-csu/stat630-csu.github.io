@@ -4,7 +4,7 @@ Homework 2 in STAT630: Advanced Statistical Data Analysis @ CSU
 
 ## Assignment
 
-1. The file `denver-2020.csv` was created from the NYTimes Coronavirus (Covid-19) Data in the United States Repo (https://github.com/nytimes/covid-19-data) and contains case and death counts for Denver County in 2020 due to Covid-19. Load the data into `R`. You will model daily new cases which is labeled `new_cases`.
+1. The file [`denver-2020.csv`](./denver-2020.csv) was created from the NYTimes Coronavirus (Covid-19) Data in the United States Repo (https://github.com/nytimes/covid-19-data) and contains case and death counts for Denver County in 2020 due to Covid-19. Load the data into `R`. You will model daily new cases which is labeled `new_cases`.
 
     a) **[4 pts]** Plot the data.
     b) **[3 pts]** An exponential growth model (Section 2.3.3) seems like an appropriate model for the initial growth of the daily new cases data. Use the plot and any other resources to choose an initial time window for which an exponential regression model is appropriate.  Do some exploratory analysis to get initial guesses for the parameters of the exponential regression model.  Adjust your initial window if you like.
