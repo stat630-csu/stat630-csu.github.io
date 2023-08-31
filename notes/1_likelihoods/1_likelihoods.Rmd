@@ -13,6 +13,7 @@ library(knitr)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(broom)
 set.seed(100)
 
 theme_set(theme_bw())
@@ -538,15 +539,15 @@ $$
 L(\boldsymbol \theta | \boldsymbol Y, \boldsymbol \delta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
 $$
 
-## Likelihood for Regression Models {.page-break-before}
+## Likelihoods for Regression Models {.page-break-before}
 
-We will start wil linear regression and then talk about more general models.
+We will start with linear regression and then talk about more general models.
 
 ### Linear Model
 
 Consider the familiar linear model
 $$
-Y_i = \boldsymbol x_i^\top \boldsymbol \beta + e_i, \qquad i =1, \dots, n,
+Y_i = \boldsymbol x_i^\top \boldsymbol \beta + \epsilon_i, \qquad i =1, \dots, n,
 $$
 where $\boldsymbol x_1, \dots, \boldsymbol x_n$ are known nonrandom vectors.
 
@@ -558,8 +559,195 @@ $$
 L(\boldsymbol \beta, \sigma | \{Y_i, \boldsymbol x_i\}_{i = 1}^n) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
 $$
 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
+What do you do when $\epsilon_i$ are not Gaussian?
 
+<br/><br/><br/><br/><br/>
+
+**Example (Venice sea levels):** The annual maximum sea levels in Venice for 1931--1981 are :
+
+```{r echo = FALSE, message=FALSE, warning=FALSE}
+venice <- data.frame(year = seq(1931, 1981),
+                     sea_level = c(102, 78, 121, 116, 115, 147, 119, 114, 89, 102, 99, 91, 97, 106, 105, 136, 126, 132, 104, 117, 151, 116, 107, 112, 97, 95, 119, 124, 118, 145, 122, 114, 118, 107, 110, 194, 138, 144, 138, 123, 122, 120, 114, 96, 125, 124, 120, 132, 166, 134, 138))
+
+ggplot(venice) +
+  geom_point(aes(year, sea_level)) +
+  geom_smooth(aes(year, sea_level), method = "lm", se = FALSE)
+
+```
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Additive Errors Nonlinear Model
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Generalized Linear Models
+
+<br/><br/><br/><br/>
+
+Imagine an experiment where individual mosquitos are given some dosage of pesticide. The response is whether the mosquito lives or dies. The data might look something like:
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Goal:** Model the relationship between the predictor and response.
+
+<br/><br/><br/>
+
+**Question:** What would a curve of best fit look like?
+
+<br/><br/><br/>
+
+**Refined Goal:**
+
+Let's build a sensible model.
+
+**Step 1:** Find a function that behaves the way we want.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r, out.width="50%", fig.show = "hold"}
+# understanding the logistic function
+# first, theta just equals x
+x <- seq(-7, 7, .1)
+theta <- x
+y <- exp(theta)/(1 + exp(theta))
+ggplot() + geom_line(aes(x, y))
+
+# now, let theta be a linear function of x
+theta <- 1 + 3*x  
+y <- exp(theta)/(1 + exp(theta))
+ggplot() + geom_line(aes(x, y))
+```
+
+**Step 2:** Build a stochastic mechanism to relate to a binary response.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Step 3:** Put Step 1 and Step 2 together.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Fitting our model: Does OLS make sense?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Consider the likelihood contribution.
+
+$$
+L_i(p_i|Y_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+So the log-likelihood contribution is
+
+$$
+\ell_i(p_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+Recall, we said $p_i = \frac{\exp(\theta_i)}{1 + \exp(\theta_i)}$ was sensible.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Which gives us,
+
+$$
+\ell_i(\theta_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/>
+
+So the log-likelihood is
+
+$$
+\ell(\theta_1, \dots, \theta_n) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+To optimize?
+
+```{r}
+## data on credit default
+data("Default", package = "ISLR") 
+head(Default)
+
+## fit model with ML
+m0 <- glm(default ~ balance, data = Default, family = binomial)
+tidy(m0) |> kable()
+glance(m0) |> kable()
+
+## plot the curve
+x_new <- seq(0, 2800, length.out = 200)
+theta <- m0$coefficients[1] + m0$coefficients[2]*x_new
+p_hat <- exp(theta)/(1 + exp(theta))
+
+ggplot() +
+  geom_point(aes(balance, as.numeric(default) - 1), alpha = 0.5, data = Default) +
+  geom_line(aes(x_new, p_hat), colour = "blue") + 
+  ylab("Probability of Defaulting")
+
+```
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In general, a GLM is three pieces:
+
+1. The random component
+
+<br/><br/><br/><br/>
+
+2. The systemic component
+
+<br/><br/><br/><br/>
+
+3. A linear predictor
+
+<br/><br/><br/><br/>
+
+Remarks:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Poisson regression):**
+
+<br/><br/><br/><br/>
+
+Consider a general family of distributions:
+
+$$
+\log f(y_i; \theta_i, \phi) = \frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)} + c(y_i, \phi).
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Normal model):**
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+We can learn something about this distribution by considering it's mean and variance. Because we don't have an explicit form of the density, we rely on two facts:
+
+1. $\text{E}\left[\frac{\partial \log f(Y_i; \theta_i, \phi)}{\partial \theta_i}\right] = 0.$
+
+<br/><br/><br/><br/>
+
+2.  $\text{E}\left[\frac{\partial^2 \log f(Y_i; \theta_i, \phi)}{\partial \theta_i^2}\right] + \text{E}\left[\left(\frac{\partial \log f(Y_i; \theta_i, \phi)}{\partial \theta_i}\right)^2\right] = 0.$
+
+<br/><br/><br/><br/>
+
+For $\log f(y_i; \theta_i, \phi) = \frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)} + c(y_i, \phi)$,
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Bernoulli model):**
+$$
+f(y_i; p_i) = p_i^{y_i}(1 - p_i)^{1 - y_i}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Finally, back to modelling. Our **goal** is to build a relationship between the mean of $Y_i$ and covariates $\boldsymbol x_i$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Bernoulli model, cont'd):**
 
 
 ## Marginal and Conditional Likelihoods {.page-break-before}
