@@ -412,6 +412,7 @@ $$
 
 **Example (Likelihood Principle):** Consider data from two different sampling plans:
 
+1. A binomial experiment with $n = 12$. Let $Y_i = 1$ if $i^{\text{th}}$ trial is a success and $0$ otherwise.
     $$
     L_1(p | \boldsymbol Y) = {12 \choose S} p^S (1 - p)^{12 - S}, \text{ where } S = \sum\limits_{i = 1}^n Y_i
     $$
@@ -751,6 +752,68 @@ Finally, back to modelling. Our **goal** is to build a relationship between the 
 
 
 ## Marginal and Conditional Likelihoods {.page-break-before}
+
+Consider a model which has $\boldsymbol \theta = (\boldsymbol \theta_1, \boldsymbol \theta_2)$, where $\boldsymbol \theta_1$ are the parameters of interest and $\boldsymbol \theta_2$ are nuisance parameters.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+One way to improve estimation for $\boldsymbol \theta_1$ is to find a one-to-one transformation of the data $\boldsymbol Y$ to $(\boldsymbol V, \boldsymbol W)$ such that either
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The key feature is that one component of each contains only the parameter of interest.
+
+<br/>
+
+**Example (Neyman-Scott problem):** Let $Y_{ij}, i = 1, \dots, n, j = 1, 2$ be intependent normal random variables with possible different means $\mu_i$ but the same variance $\sigma^2$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Our goal is to estimate $\sigma^2$. Should we be able to?
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Following the usual arguments,
+
+$$
+\hat{\mu}_{i, \text{MLE}} = \frac{Y_{i1} + Y_{i2}}{2} \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\\
+\hat{\sigma}_{\text{MLE}}^2 = \frac{1}{2n}\sum\limits_{i = 1}^n \sum\limits_{j = 1}^2 (Y_{ij} - \hat{\mu}_{i, \text{MLE}})^2 \quad \qquad\qquad\qquad\qquad\qquad
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+$$
+\text{E}[\hat{\sigma}_{\text{MLE}}^2] = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+A reworking of the data seems more promising. Let,
+$$
+V_i = \frac{Y_{i1} - Y_{i2}}{\sqrt{2}} \qquad \text{and}\qquad W_i = \frac{Y_{i1} + Y_{i2}}{\sqrt{2}}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+For conditional likelihoods, we can often exploit the existence of sufficient statistics for the nuisance parameters under the assumption that the parameter of interest is known.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Exponential Families):** The structure of exponential families is such that it is often possible to exploit their properties to eliminated nuisance parameters. Let $Y$ have a density of the form
+$$
+f(y; \boldsymbol \eta) = h(y)\exp\left\{\sum\limits_{i = 1}^s \eta_i T_i(y) - A(\boldsymbol \eta)\right\},
+$$
+then
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Thus, exponential families often provide an automatic procedure for finding $\boldsymbol W$ and $\boldsymbol U$.
+
+**Example (Logistic Regression):** For binary $Y_i$, the standard logistics regression model is
+$$
+P(Y_i = 1) = p_i(\boldsymbol x_i, \boldsymbol \beta) = \frac{\exp(\boldsymbol x_i^\top\boldsymbol \beta)}{1 + \exp(\boldsymbol x_i^\top\boldsymbol \beta)}
+$$
+and the likelihood is
+$$
+L(\boldsymbol \beta | \boldsymbol Y, \boldsymbol X) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
 
 ## The Maximum Likelihood Estimator and the Information Matrix {.page-break-before}
 
