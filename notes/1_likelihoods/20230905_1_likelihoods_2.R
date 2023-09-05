@@ -25,4 +25,7 @@ loglik <- function(theta, data) {
   sum(dgumbel(data$sea_level - (theta[1] + theta[2] * data$year), 0, theta[3], log = TRUE))
 }
 
-m_mle <- optim(c(m_ols$coefficients, 10), loglik, data = venice, control = list(fnscale = -1))
+m_mle <- optim(c(m_ols$coefficients, 10), loglik, data = venice, control = list(fnscale = -1), hessian = TRUE)
+
+## SE for beta_1
+sqrt(diag(solve(-m_mle$hessian)))
