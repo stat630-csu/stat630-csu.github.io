@@ -10,8 +10,8 @@ Turn in pdfs to https://canvas.colostate.edu **by 4pm** on the due date.
 
 1. [Homework 1](hw-1/) - Due Sep. 1
 1. [Homework 2](hw-2/) - Due Sep. 8
+1. [Homework 3](hw-3/) - Due Sep. 15
 <!--
-1. [Homework 3](https://github.com/stat400-csu/hw-3/) - Due Sep. 22
 1. [Homework 4](https://github.com/stat400-csu/hw-4/) - Due Sep. 29
 1. [Homework 5](https://github.com/stat400-csu/hw-5/) - Due Oct. 6 
 1. [Homework 6](https://github.com/stat400-csu/hw-6/) - Due Oct. 13
