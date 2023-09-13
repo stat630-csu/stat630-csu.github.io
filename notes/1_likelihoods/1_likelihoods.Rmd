@@ -817,5 +817,124 @@ $$
 
 ## The Maximum Likelihood Estimator and the Information Matrix {.page-break-before}
 
+We have now talked about how to construct likelihoods in a variety of settings, now we can use those constructions to formalize how we make inferences about model parameters.
+
+<br/><br/><br/><br/>
+
+Recall the score function
+
+$$
+S(\boldsymbol Y, \boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Generally, the maximum likelihood estimator $\hat{\boldsymbol \theta}_{\text{MLE}}$ is the value of $\boldsymbol \theta$ where the maximum (over the parameter space $\Theta$) of $L(\boldsymbol \theta | \boldsymbol Y)$ is attained.
+
+<br/><br/><br/><br/>
+
+Under the assumption that the log-likelihood is continuously differentiable, then 
+
+<br/><br/><br/><br/>
+
+But not always (?!).
+
+**Example (Exponential threshold model):** Suppose that $Y_1, \dots, Y_n$ are iid from the exponential distribution with a threshold parameter $\mu$,
+$$
+f(y; \mu) = \begin{cases}
+\exp\{-(y - \mu)\} & \mu < y < \infty \\
+0 & \text{otherwise,}
+\end{cases}
+$$
+for $\infty < \mu < \infty$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r, echo = FALSE}
+y <- c(2.47, 2.35, 2.23, 3.53, 2.36)
+```
+
+Consider the artificial data set $\boldsymbol y = [`r paste(y, collapse = ", ")`]$.
+
+```{r, echo = FALSE}
+lik <- function(mu, data) {
+  n <- length(data)
+  exp(-sum(data)) * exp(n * mu) * all(mu < data)
+}
+
+data.frame(mu = seq(1, 3, length.out = 1000)) |>
+  rowwise() |>
+  mutate(likelihood = lik(mu, y)) -> plot_dat
+
+ggplot() +
+  geom_line(aes(mu, likelihood), data = plot_dat |> filter(mu < 2.23)) +
+  geom_line(aes(mu, likelihood), data = plot_dat |> filter(mu >= 2.23)) +
+  geom_point(aes(2.23, lik(2.22999, y)), shape = 1, size = 1.5)
+```
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### The Fisher Information Matrix
+
+The Fisher information matrix $I(\boldsymbol \theta)$ is defined as the $b\times b$ matrix where
+$$
+I_{ij}(\boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In matrix form,
+$$
+I(\boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Fisher information facts:
+
+1. The Fisher information matrix is the variance of the score contribution.
+
+<br/><br/><br/><br/><br/><br/>
+
+2. If regularity conditions are met, 
+    $$
+    \sqrt{n}(\hat{\boldsymbol \theta}_{\text{MLE}} - \theta) \stackrel{d}{\rightarrow} \text{N}_{b}(0, I(\boldsymbol \theta)^{-1}).
+    $$
+    
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+3. If $b = 1$, then any unbiased estimator must have variance greater than or equal to $\{n I(\boldsymbol \theta)\}^{-1}$
+
+<br/><br/><br/><br/><br/><br/>
+
+4. The information matrix is related to the curvature of the log-likelihood contribution.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Observed Information
+
+The information matrix is not random, but it is also not observable from the data.
+
+<br/><br/><br/><br/>
+
+Let $Y_1, \dots, Y_n$ be iid with density $f_Y(y_i; \boldsymbol \theta)$. The log likelihood is defined as
+
+<br/><br/><br/><br/><br/><br/>
+
+taking two derivatives and dividing by $n$ results in
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Definition: **The matrix $n\bar{I}(Y; \hat{\boldsymbol \theta}_{\text{MLE}})$ is called the sample information matrix, or the *observed information matrix*.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Why use $I(\boldsymbol \theta) = \text{E}\left[-\frac{\partial^2}{\partial \boldsymbol \theta\partial \boldsymbol \theta^\top} \log f(Y_1; \boldsymbol \theta)\right]$ as the basis for an estimator, rather than $I(\boldsymbol \theta) = \text{E}\left[\left\{\frac{\partial}{\partial \boldsymbol \theta^\top} \log f(Y_1; \boldsymbol \theta)\right\}\left\{\frac{\partial}{\partial \boldsymbol \theta} \log f(Y_1; \boldsymbol \theta)\right\}\right]$?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Now let's prove the asymptotic normality of the MLE (in the scalar case).
+
 
 
