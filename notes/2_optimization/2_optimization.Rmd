@@ -1,0 +1,354 @@
+---
+title: "Methods of Maximizing the Likelihood"
+output:
+  pagedown::html_paged:
+    # change to true for a self-contained document, but it'll be a litte slower for Pandoc to render
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message = FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(broom)
+set.seed(333)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+Maximum likelihood estimation requires maximization of the log likelihood $\ell(\boldsymbol \theta) = \log L(\boldsymbol \theta | \boldsymbol Y)$.
+
+
+
+# EM Algorithm
+
+Approach solving the likelihood equation via viewing the observed data $\boldsymbol Y$ as incomplete and that there is missing data $\boldsymbol Z$ that would make the problem simpler if we had it.
+
+<br/><br/><br/><br/>
+
+**Example (Two-Component Mixture):** Suppose $Y_1, \dots, Y_n$ are iid from the mixture density
+$$
+f(y; \boldsymbol \theta) = pf_1(y ; \boldsymbol \mu_1, \Sigma_1) + (1 - p)f_2(y ; \boldsymbol \mu_2, \Sigma_2),
+$$
+where $f_1$ and $f_2$ are bivariate normal densities with mean vectors $\boldsymbol \mu_1$ and $\boldsymbol \mu_2$ and variance matrices $\Sigma_1$ and $\Sigma_2$, respectively. Thus, the parameter vector $\boldsymbol \theta = (p, \boldsymbol \mu_1, \boldsymbol \mu_2, \Sigma_1, \Sigma_2)$ and the likelihood is
+$$
+L(p, \boldsymbol \mu_1, \boldsymbol \mu_2, \Sigma_1, \Sigma_2) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/>
+
+```{r, fig.show='hold', out.width="50%", fig.height=5}
+library(mvtnorm) ## multivariate normal
+
+p = .6
+mu1 <- c(0, 0)
+sig1 <- matrix(c(1, 0, 0, 1), ncol = 2)
+mu2 <- c(1.5, 1.5)
+sig2 <- matrix(c(1, .6, .6, 1), ncol = 2)
+
+## sample from the mixture
+n <- 50
+z <- rbinom(n, 1, p)
+
+y1 <- rmvnorm(sum(z), mean = mu1, sigma = sig1)
+y2 <- rmvnorm(n - sum(z), mean = mu2, sigma = sig2)  
+y <- matrix(NA, nrow = n, ncol = 2) ## observed data
+y[z == 1, ] <- y1
+y[z == 0, ] <- y2
+
+df <- data.frame(y, z)
+
+## plot data
+ggplot(df) +
+  geom_point(aes(X1, X2)) +
+  ggtitle("Observed (Incomplete) Data")
+
+ggplot(df) +
+  geom_point(aes(X1, X2, colour = as.character(z))) +
+  ggtitle("Complete Data")
+
+```
+Let's try to maximize the likelihood
+
+```{r}
+# loglikelihood of incomplete data--no knowledge of z
+loglik_mixture <- function(par, data) {
+	p <- plogis(par[1])  # p guaranteed to be in [0,1]
+	mu1 <- c(par[2], par[3])
+	sig1 <- matrix(c(exp(par[4]), par[5], par[5], exp(par[4])), nrow = 2)
+	mu2 <- c(par[6], par[7])
+	sig2 <- matrix(c(exp(par[8]), par[9], par[9], exp(par[8])), nrow = 2)
+	# note:  exponential guarantees the diagonal elements are positive, but
+	# nothing to guarantee matrices are positive definite. (Could do square root)
+
+	out <- log(p * dmvnorm(data, mean = mu1, sigma = sig1) + 
+	             (1-p) * dmvnorm(data, mean = mu2, sigma = sig2))
+	return(sum(out))
+}
+
+## optimize from different starting values
+mle1 <- optim(c(0, -.2, -.2, .5, 0, 2, 2, .5, 0), loglik_mixture, data = y, control = list(fnscale = -1))
+mle2 <- optim(c(.405, 0, 0, 0, 0, 1.5, 1.5, 0, .6), loglik_mixture, data = y, control = list(fnscale = -1))
+```
+
+```{r, echo = FALSE}
+data.frame(Parameter = c("$p$", "$\\mu_{11}$", "$\\mu_{12}$", "$\\Sigma_{111}$", "$\\Sigma_{112}$", "$\\mu_{21}$",  "$\\mu_{22}$", "$\\Sigma_{211}$", "$\\Sigma_{212}$"), 
+           Truth = c(p, mu1, sig1[1:2], mu2, sig2[1:2]),
+           MLE1 = c(plogis(mle1$par[1]), mle1$par[c(2,3)], exp(mle1$par[4]), mle1$par[5:7], exp(mle1$par[8]), mle1$par[9]),
+           MLE2 = c(plogis(mle2$par[1]), mle2$par[c(2,3)], exp(mle1$par[4]), mle2$par[5:7], exp(mle2$par[8]), mle2$par[9])) |>
+  kable(escape = FALSE, digits = 4)
+
+```
+
+<br/><br/><br/><br/>
+
+Fitted results:
+
+```{r, echo = FALSE, fig.show='hold', out.width="50%", fig.height=5}
+hat_p <- plogis(mle2$par[1])
+hat_mu1 <- mle2$par[2:3]
+hat_sig1 <- matrix(c(exp(mle2$par[4]), mle2$par[5], mle2$par[5], exp(mle2$par[4])), nrow = 2)
+hat_mu2 <- mle2$par[6:7]
+hat_sig2 <- matrix(c(exp(mle2$par[8]), mle2$par[9], mle2$par[9], exp(mle2$par[8])), nrow = 2)
+
+expand.grid(y1 = seq(-5, 5, by = .1), y2 = seq(-5, 5, by = .1)) |>
+  rowwise() |>
+  mutate(dens1 = hat_p * dmvnorm(c(y1, y2), mean = hat_mu1, sigma = hat_sig1),
+         dens2 = (1 - hat_p) * dmvnorm(c(y1, y2), mean = hat_mu2, sigma = hat_sig2),
+         dens_mix = dens1 + dens2) -> plot_dens
+  
+ggplot() +
+  geom_contour(aes(y1, y2, z = dens1), colour = "red", data = plot_dens) +
+  geom_contour(aes(y1, y2, z = dens2), colour = "blue", data = plot_dens) +
+  geom_point(aes(X1, X2, colour = as.character(z)), data = df) +
+  geom_point(aes(hat_mu1[1], hat_mu1[2]), shape = 2, colour = "red") +
+  geom_point(aes(hat_mu2[1], hat_mu2[2]), shape = 2, colour = "blue") +
+  scale_color_manual(values = c("blue", "red")) +
+  theme(legend.position = "none")
+
+ggplot() +
+  geom_contour(aes(y1, y2, z = dens_mix), data = plot_dens, colour = "black") +
+  geom_point(aes(X1, X2), data = df)
+```
+
+This seems pretty good... can we break this with initialization?
+
+```{r}
+# Centered the second mixture component at a data point, and shrink 
+# variance, so normal is super-concentrated around that point.
+loglik_mixture(c(.6, 0, 0, 0, 0, y[30, 1], y[30, 2], -50, 0), data = y)  
+mle3 <- optim(c(.6, 0, 0, 0, 0, y[30, 1], y[30, 2], -50, 0), loglik_mixture, data = y, control = list(fnscale = -1))
+```
+```{r, echo = FALSE}
+data.frame(Parameter = c("$p$", "$\\mu_{11}$", "$\\mu_{12}$", "$\\Sigma_{111}$", "$\\Sigma_{112}$", "$\\mu_{21}$",  "$\\mu_{22}$", "$\\Sigma_{211}$", "$\\Sigma_{212}$"), 
+           Truth = c(p, mu1, sig1[1:2], mu2, sig2[1:2]),
+           MLE3 = c(plogis(mle3$par[1]), mle3$par[c(2,3)], exp(mle3$par[4]), mle3$par[5:7], exp(mle3$par[8]), mle3$par[9])) |>
+  kable(escape = FALSE, digits = 4)
+
+```
+
+
+What would change if we were given the complete data, where $Z_i \stackrel{iid}{\sim}\text{Bern}(p)$?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Consider the complete log-likelihood:
+
+\begin{align*}
+\ell(p, \boldsymbol \mu_1, \boldsymbol \mu_2, \Sigma_1, \Sigma_2 | \boldsymbol Y, \boldsymbol Z) &= \sum\limits_{i = 1}^n\left\{Z_i\log f_1(Y_i; \boldsymbol \mu_1, \Sigma_1) + (1 - Z_i)\log f_2(Y_i; \boldsymbol \mu_2, \Sigma_2) \right. \\
+&\qquad \left. + Z_i \log p + (1 - Z_i) \log (1 - p)\right\}.
+\end{align*}
+
+We could consider the $Z_i$'s as "weights" which represent our *current* believe in which density each datum come from.
+
+<br/><br/><br/><br/>
+
+Given what our belief is in the weights of the data, what is our estimate of the model parameters?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+This is the basic intuition for the EM algorithm. We will view our data $\boldsymbol Y$ as incomplete and imagine there is missing data $\boldsymbol Z$ that would make the problem simpler if we had it. The EM algorithm then follows:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Two-Component Mixture, Cont'd):** The EM algorithm for the two-component Gaussian mixture model is
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Your Turn:** Implement the EM algorithm for the two-component mixture model on our example data.
+
+## Convergence of the EM algorithm
+
+We will show that $\ell\left(\hat{\boldsymbol \theta}^{(k + 1)}\right) \ge \ell\left(\hat{\boldsymbol \theta}^{(k)}\right)$.
+
+<br/><br/><br/><br/><br/><br/>
+
+We know $f_{Z|Y}(z | y; \boldsymbol \theta) = \frac{f_{YZ}(y, z; \boldsymbol \theta)}{f_Y(y | \boldsymbol \theta)}$.
+
+<br/><br/><br/><br/>
+
+Assume we observe $\boldsymbol y = (y_1, \dots, y_n)$, then
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+So, in order to show that $\ell\left(\hat{\boldsymbol \theta}^{(k + 1)}\right) \ge \ell\left(\hat{\boldsymbol \theta}^{(k)}\right)$, this is the same as
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Step 1:** Show that $H(\boldsymbol \theta, \boldsymbol \theta^{(k)})$ is maximized when $\boldsymbol \theta = \boldsymbol \theta^{(k)}$.
+
+<br/>
+
+Recall: Jensen's Inequality. A function $\Phi$ is convex if $\Phi(\frac{x_1 + x_2}{2}) \le \frac{1}{2}\Phi(x_1) + \frac{1}{2}\Phi(x_2)$. Then
+$$
+\Phi(\text{E}[g(X)]) \le \text{E}[\Phi(g(X))],
+$$
+where $g$ is a real-valued integrable function.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Step 2:** Find a $\boldsymbol \theta^{k + 1}$ that will optimize $Q$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Two-Component Mixture, Cont'd):**
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/>
+
+The EM algorithm allows us to obtain $\hat{\boldsymbol \theta}_{\text{EM}}$, the parameter estimate which optimizes the algorithm.
+
+## Variance Estimation for EM estimates
+
+The EM algorithm find the MLE, but it does not automatically produce an estimate of the covariance matrix. Why not?
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+There are several options to estimate the variance.
+
+1. **Bootstrapping**
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+2. **Louis's Method**
+
+## Another way to cluster: K-means {.page-break-before}
+
+**Goal of clustering:**
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Methods for clustering include hierarchical and non-hierarchical, algorithmic and model-based.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+K-means is a simple and elegant approach to partition a data set into $K$ distinct, non-overlapping clusters.
+
+<br/><br/><br/><br/><br/><br/>
+
+```{r, echo = FALSE, fig.show='hold', out.width="33%", fig.height = 6}
+X <- mvtnorm::rmvnorm(100, mean = c(0, 0))
+X[1:33,] <- X[1:33,] + matrix(rep(c(-3, -3), 33), ncol = 2, byrow = TRUE)
+X[34:67,] <- X[34:67,] + matrix(rep(c(3, 0), 34), ncol = 2, byrow = TRUE)
+
+K2 <- kmeans(X, 2)
+K3 <- kmeans(X, 3)
+K4 <- kmeans(X, 4)
+
+data.frame(X) |>
+  ggplot() +
+  geom_point(aes(X1, X2, colour = as.factor(K2$cluster)), size = 2) +
+  theme(legend.position = "none", text = element_text(size = 30)) +
+  ggtitle("K = 2") +
+  xlab("") + ylab("")
+
+data.frame(X) |>
+  ggplot() +
+  geom_point(aes(X1, X2, colour = as.factor(K3$cluster)), size = 2) +
+  theme(legend.position = "none", text = element_text(size = 30)) +
+  ggtitle("K = 3") +
+  xlab("") + ylab("")
+
+data.frame(X) |>
+  ggplot() +
+  geom_point(aes(X1, X2, colour = as.factor(K4$cluster)), size = 2) +
+  theme(legend.position = "none", text = element_text(size = 30)) +
+  ggtitle("K = 4") +
+  xlab("") + ylab("")
+```
+
+<br/>
+
+The $K$-means clustering procedure results from a simple and intuitive mathematical problem. Let $C_1, \dots, C_K$ denote sets containing the indices of observations in each cluster. These satisfy two properties:
+
+<br/>
+
+1. <br/><br/><br/><br/>
+
+2. <br/><br/><br/><br/>
+
+**Idea:** 
+
+\newpage
+
+
+The *within-cluster variation* for cluster $C_k$ is a measure of the amount by which the observations within a cluster differ from each other.
+
+<br/><br/><br/><br/><br/><br/>
+
+To solve this, we need to define within-cluster variation.
+
+<br/><br/><br/><br/><br/><br/>
+
+This results in the following optimization problem that defines $K$-means clustering:
+
+<br/><br/><br/><br/><br/><br/>
+
+A very simple algorithm has been shown to find a local optimum to this problem:
+
+\newpage
+
+\newpage
+
+Questions about the algorithm:
+
+1. How do we define distance?
+
+<br/><br/><br/><br/>
+
+2. How do we choose starting values?
+
+<br/><br/><br/><br/>
+
+3. How do we choose $k$?
+
+<br/><br/><br/><br/>
+
+Compared to the Gaussian mixture problem,
+
+# Profile Likelihood {.page-break-before}
+
