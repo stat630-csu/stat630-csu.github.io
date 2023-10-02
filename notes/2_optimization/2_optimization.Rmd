@@ -352,3 +352,85 @@ Compared to the Gaussian mixture problem,
 
 # Profile Likelihood {.page-break-before}
 
+The term "profile likelihood" can mean multiple things.
+
+<br/><br/><br/><br/>
+
+## Analytical Methods via Profile Likelihoods
+
+In certain problems it is possible to maximize the log likelihood for part of $\boldsymbol \theta = (\boldsymbol \theta_1^\top, \boldsymbol \theta_2^\top)^\top$ without actually knowing the value of the other part.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+The **profile likelihood** is the usual likelihood with the known function of part of the parameter vector inserted for that parameter, making the likelihood only a function of one part of the vector.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Hurricane Data, Cont'd):** For $36$ hurricanes that had moved far inland on the East Coast of the US in 1900-1969, maximum 24-hour precipitation levels during the time they were over mountains.
+
+```{r echo=FALSE}
+hurr_rain <- c(31, 2.82, 3.98, 4.02, 9.5, 4.5, 11.4, 10.71, 6.31, 4.95, 5.64, 5.51, 13.40, 9.72, 6.47, 10.16, 4.21, 11.6, 4.75, 6.85, 6.25, 3.42, 11.8, 0.8, 3.69, 3.10, 22.22, 7.43, 5, 4.58, 4.46, 8, 3.73, 3.5, 6.2, 0.67)
+
+ggplot() + 
+  geom_histogram(aes(hurr_rain), binwidth = .5) +
+  xlab("Precipitation Levels")
+```
+
+We modeled the precipitation levels with a gamma distribution, which has log likelihood
+$$
+\ell(\alpha, \beta) = -n\log \Gamma(\alpha) - n\alpha \log \beta + (\alpha - 1) \sum \log Y_i - \frac{\sum Y_i}{\beta}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r}
+gamma_prof_loglik <- function(alpha, data) {
+  beta <- mean(data) / alpha
+  sum(dgamma(data, alpha, scale = beta, log = TRUE))
+}
+
+## get maximum profile likelihood estimate
+alpha_mple <- optim(1, gamma_prof_loglik, data = hurr_rain, method = "BFGS", control = list(fnscale = -1))
+
+## plot profile likelihood
+data.frame(alpha = seq(1, 3, length.out = 200)) |>
+  rowwise() |>
+  mutate(p_log_lik = gamma_prof_loglik(alpha, hurr_rain)) |>
+  ggplot() +
+  geom_line(aes(alpha, p_log_lik)) +
+  geom_vline(aes(xintercept = alpha_mple$par), lty = 2)
+```
+
+
+
+## Numerical Methods via Profile Likelihoods {.page-break-before}
+
+The log likelihood can be maximized over one portion of the partition $\boldsymbol \theta = (\boldsymbol \theta_1^\top,\boldsymbol \theta_2^\top)^\top$ for any fixed value of the other, even if that maximization cannot be expressed as an explicit function.
+
+<br/><br/>
+
+We can define a profile likelihood as
+$$
+L^p(\boldsymbol \theta_2) = \max\limits_{\boldsymbol\theta_1} L(\boldsymbol \theta_1, \boldsymbol \theta_2).
+$$
+<br/><br/><br/><br/><br/><br/>
+
+The profile likelihood and log profile likelihood behave in many ways like true likelihood functions:
+
+1. The estimate of $\boldsymbol \theta_2$ found by maximizing $L^p(\boldsymbol \theta_2)$ is the MLE of $\boldsymbol \theta_2$.
+
+<br/><br/><br/><br/>
+
+2. A likelihood ratio test statistics formed with the profile likelihood has a limiting $\chi^2$ distribution. 
+
+<br/><br/><br/><br/>
+
+3. A profile likelihood confidence region is a valid approximate confidence region for $\boldsymbol \theta_2$.
+
+<br/><br/><br/><br/>
+
+Where does this confidence region come from?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+However, these are *not* full likelihood functions.
+
