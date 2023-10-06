@@ -32577,6 +32577,44 @@ Is this an M-estimator?</p>
 </div>
 <div id="basic-approach" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Basic Approach</h1>
+<p>M-estimators are solutions of the vector equation
+<span class="math display">\[
+\sum\limits_{i = 1}^n \boldsymbol \psi(\boldsymbol Y_i, \boldsymbol \theta) = \boldsymbol 0.
+\]</span>
+but what are they estimating?</p>
+<p><br /><br /><br /><br /><br /><br /></p>
+<p><strong>Example (Sample Mean, cont’d):</strong> Recall we said <span class="math inline">\(\theta = \overline{Y} = \frac{1}{n}\sum\limits_{i = 1}^n Y_i\)</span> is an M-estimator for <span class="math inline">\(\psi(Y_i, \theta) = Y_i - \theta\)</span>. What is the true parameter?</p>
+<div class="page-break-after"></div>
+<p>To arrive at the sandwich estimator, assume <span class="math inline">\(\boldsymbol Y_1, \dots, \boldsymbol Y_n \stackrel{iid}{\sim} F\)</span> and define
+<span class="math display">\[
+\boldsymbol G_n(\boldsymbol \theta) = \frac{1}{n}\sum\limits_{i = 1}^n \boldsymbol \psi(\boldsymbol Y_i; \boldsymbol \theta).
+\]</span></p>
+<p><br /><br /><br /><br /><br /><br /></p>
+<p>Taylor expansion of <span class="math inline">\(\boldsymbol G_n(\boldsymbol \theta)\)</span> around <span class="math inline">\(\boldsymbol \theta_0\)</span> evaluated at <span class="math inline">\(\hat{\boldsymbol \theta}\)</span> yields</p>
+<div class="page-break-after"></div>
+<p>Define <span class="math inline">\(\boldsymbol A(\boldsymbol \theta_0) = \text{E}_F[-\boldsymbol \psi&#39;(\boldsymbol Y_1, \boldsymbol \theta_0)]\)</span>.</p>
+<div class="page-break-after"></div>
+<div id="estimators-for-boldsymbol-a-boldsymbol-b" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Estimators for <span class="math inline">\(\boldsymbol A, \boldsymbol B\)</span></h2>
+<p>If the data truly come from the assumed parametric family <span class="math inline">\(f(y; \boldsymbol \theta)\)</span>,</p>
+<p><br /><br /><br /><br /><br /><br /></p>
+<p>One of the key contributions of M-estimation theory is to point out what happens when the assumed parametric family is not correct.</p>
+<p><br /><br /><br /><br /></p>
+<p>We can use empirical estimators of <span class="math inline">\(\boldsymbol A\)</span> and <span class="math inline">\(\boldsymbol B\)</span>:</p>
+<div class="page-break-after"></div>
+<p><strong>Example (Coefficient of Variation):</strong> Let <span class="math inline">\(Y_1, \dots, Y_n\)</span> be idd from some distribution with finite fourth moment. The coefficient of variation is defined at <span class="math inline">\(\hat{\theta}_3 = s_n / \overline{Y}\)</span>.</p>
+<p><br /><br /><br /><br /><br /><br /></p>
+<p>Define a three dimensional <span class="math inline">\(\boldsymbol \psi\)</span> so that <span class="math inline">\(\hat{\theta}_3\)</span> is defined by summing the third component. What is the vector valued function <span class="math inline">\(\boldsymbol \psi\)</span> which yields an M-estimator for the coefficient of variation?</p>
+<div class="page-break-after"></div>
+<p>What parameter vector is being estimated by the M-estimator?</p>
+<p><br /><br /><br /><br /><br /><br /><br /><br /></p>
+<p>What are the matrices <span class="math inline">\(\boldsymbol A\)</span> and <span class="math inline">\(\boldsymbol B\)</span>?</p>
+<div class="page-break-after"></div>
+<p>Write out the asymptotic variance, <span class="math inline">\(\boldsymbol V\)</span>.</p>
+<div class="page-break-after"></div>
+<p>Assume <span class="math inline">\(Y_i\)</span> are iid from a normal distribution with mean <span class="math inline">\(10\)</span> and standard deviation <span class="math inline">\(1\)</span>. Calculate <span class="math inline">\(V_{3,3}\)</span>. Assume you have a same of size <span class="math inline">\(25\)</span> and you get an estimated coefficient of variation of <span class="math inline">\(0.11\)</span>. Give the asymptotic <span class="math inline">\(95\)</span>% confidence interval.</p>
+<div class="page-break-after"></div>
+</div>
 </div>
 </div>
 

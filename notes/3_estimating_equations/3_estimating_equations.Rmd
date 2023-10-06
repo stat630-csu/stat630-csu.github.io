@@ -189,3 +189,71 @@ Is this an M-estimator?
 
 
 # Basic Approach
+
+M-estimators are solutions of the vector equation
+$$
+\sum\limits_{i = 1}^n \boldsymbol \psi(\boldsymbol Y_i, \boldsymbol \theta) = \boldsymbol 0.
+$$
+but what are they estimating?
+
+<br/><br/><br/><br/><br/><br/>
+
+**Example (Sample Mean, cont'd):** Recall we said $\theta = \overline{Y} = \frac{1}{n}\sum\limits_{i = 1}^n Y_i$ is an M-estimator for $\psi(Y_i, \theta) = Y_i - \theta$. What is the true parameter?
+
+\newpage
+
+To arrive at the sandwich estimator, assume $\boldsymbol Y_1, \dots, \boldsymbol Y_n \stackrel{iid}{\sim} F$ and define
+$$
+\boldsymbol G_n(\boldsymbol \theta) = \frac{1}{n}\sum\limits_{i = 1}^n \boldsymbol \psi(\boldsymbol Y_i; \boldsymbol \theta).
+$$
+
+<br/><br/><br/><br/><br/><br/>
+
+Taylor expansion of $\boldsymbol G_n(\boldsymbol \theta)$ around $\boldsymbol \theta_0$ evaluated at $\hat{\boldsymbol \theta}$ yields
+
+\newpage
+
+Define $\boldsymbol A(\boldsymbol \theta_0) = \text{E}_F[-\boldsymbol \psi'(\boldsymbol Y_1, \boldsymbol \theta_0)]$.
+
+\newpage
+
+## Estimators for $\boldsymbol A, \boldsymbol B$
+
+If the data truly come from the assumed parametric family $f(y; \boldsymbol \theta)$,
+
+<br/><br/><br/><br/><br/><br/>
+
+One of the key contributions of M-estimation theory is to point out what happens when the assumed parametric family is not correct.
+
+<br/><br/><br/><br/>
+
+We can use empirical estimators of $\boldsymbol A$ and $\boldsymbol B$:
+
+\newpage
+
+**Example (Coefficient of Variation):** Let $Y_1, \dots, Y_n$ be idd from some distribution with finite fourth moment. The coefficient of variation is defined at $\hat{\theta}_3 = s_n / \overline{Y}$.
+
+<br/><br/><br/><br/><br/><br/>
+
+Define a three dimensional $\boldsymbol \psi$ so that $\hat{\theta}_3$ is defined by summing the third component.  What is the vector valued function $\boldsymbol \psi$ which yields an M-estimator for the coefficient of variation?
+
+\newpage
+
+What parameter vector is being estimated by the M-estimator?
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+What are the matrices $\boldsymbol A$ and $\boldsymbol B$?
+
+\newpage
+
+Write out the asymptotic variance, $\boldsymbol V$.
+
+\newpage
+
+Assume $Y_i$ are iid from a normal distribution with mean $10$ and standard deviation $1$. Calculate $V_{3,3}$. Assume you have a same of size $25$ and you get an estimated coefficient of variation of $0.11$. Give the asymptotic $95$% confidence interval.
+
+\newpage
+
+
