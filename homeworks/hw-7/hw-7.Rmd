@@ -1,5 +1,5 @@
 ---
-title: "STAT630 - Homework 6"
+title: "STAT630 - Homework 7"
 author: "Your Name"
 output: pdf_document
 ---
@@ -20,7 +20,7 @@ set.seed(630) ## reproducible
     $$
   for $x > 0$ and $\alpha, \beta > 0$.  Use the fact that $E[X] = \alpha/\beta$ and $Var[X] = \alpha/\beta^2$ to obtain method-of-moments estimators for $\alpha$ and $\beta$ in terms of the sample mean and sample variance.
 
-1.  Assume the data in the file [dat.csv](https://stat630-csu.github.io/homeworks/hw-6/dat.csv) are from a gamma distribution with unknown $\alpha$ and $\beta$.  Use your method-of-moments estimators to obtain estimates $\hat \alpha$ and $\hat \beta$. Then, draw 1000 bootstrap samples of these estimators. Create 95\% bootstrap-based confidence intervals for both $\alpha$ and $\beta$ using both the percentile method and the basic method. Report these confidence intervals.
+1.  Assume the data in the file [dat.csv](https://stat630-csu.github.io/homeworks/hw-7/dat.csv) are from a gamma distribution with unknown $\alpha$ and $\beta$.  Use your method-of-moments estimators to obtain estimates $\hat \alpha$ and $\hat \beta$. Then, draw 1000 bootstrap samples of these estimators. Create 95\% bootstrap-based confidence intervals for both $\alpha$ and $\beta$ using both the percentile method and the basic method. Report these confidence intervals.
 
 1. Create a 95\% bootstrap based confidence interval using the studentized method (write your own function to perform this). 
 
