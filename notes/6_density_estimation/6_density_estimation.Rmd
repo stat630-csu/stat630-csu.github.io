@@ -1,0 +1,239 @@
+---
+title: "Density Estimation"
+output:
+  pagedown::html_paged:
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+set.seed(333)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+**Goal:** We are interested in estimation of a density function $f$ using observations of random variables $Y_1, \dots, Y_n$ sampled independently from $f$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Parametric Solution: 
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+We will focus on **nonparametric** approaches to density estimation.
+
+# Histograms {.page-break-before}
+
+One familiar density estimator is a histogram. Histograms are produced automatically by most software packages and are used so routinely to visualize densities that we rarely talk about their underlying complexity.
+
+## Motivation
+
+Recall the definition of a density function
+$$
+f(y) \equiv \frac{d}{dy} F(y) \equiv \lim\limits_{h \rightarrow 0} \frac{F(y + h) - F(y - h)}{2h} = \lim\limits_{h \rightarrow 0} \frac{F(y + h) - F(y)}{h},
+$$
+where $F(x)$ is the cdf of the random variable $Y$.
+
+Now, let $Y_1, \dots, Y_n$ be a random sample of size $n$ from the density $f$.
+
+<br/><br/><br/><br/><br/><br/>
+
+A natural finite-sample analog of $f(y)$ is to divide the support of $Y$ into a set of $K$ equi-sized bins with small width $h$ and replace $F(x)$ with the empirical cdf.
+
+<br/><br/><br/><br/><br/><br/>
+
+## Bin Width {.page-break-before}
+
+```{r, echo = FALSE, fig.show='hold'}
+samps <- data.frame(x1 = rnorm(100), x2 = rnorm(100), x3 = rnorm(100))
+dens <- data.frame(x = seq(-3.5, 3.5, length.out = 1000)) |>
+  rowwise() |>
+  mutate(f = dnorm(x))
+
+samps |>
+  pivot_longer(everything(), names_to = "sample", values_to = "value") |>
+  mutate(sample = factor(sample, labels = c("Sample 1", "Sample 2", "Sample 3"))) |>
+  ggplot() +
+  geom_histogram(aes(value, y = after_stat(density)), bins = 20) +
+  geom_line(aes(x, f), data = dens, colour = "red") +
+  facet_wrap(.~sample)
+
+samps |>
+  pivot_longer(everything(), names_to = "sample", values_to = "value") |>
+  mutate(sample = factor(sample, labels = c("Sample 1", "Sample 2", "Sample 3"))) |>
+  ggplot() +
+  geom_histogram(aes(value, y = after_stat(density)), bins = 4) +
+  geom_line(aes(x, f), data = dens, colour = "red") +
+  facet_wrap(.~sample)
+```
+
+<br/><br/><br/><br/><br/><br/>
+
+## Measures of Performance {.page-break-before}
+
+Squared Error
+
+<br/><br/><br/><br/>
+
+Mean Squared Error
+
+<br/><br/><br/><br/>
+
+Integrated Squared Error
+
+<br/><br/><br/><br/>
+
+Mean Integrated Squared Error
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+## Optimal Binwidth {.page-break-before}
+
+We will investigate bias and variance of $\hat f$ pointwise, because $\text{MSE}(y) = (\text{bias}(\hat f(y))^2 + \text{Var} \hat f(y)$.
+
+[]{.pagebreak}
+
+The roughness of the underlying density, as measured by $R(f')$ determines the optimal level of smoothing and the accuracy of the histogram estimate.
+
+<br/><br/><br/><br/>
+
+We cannot find the optimal binwidth without known the density $f$ itself.
+
+<br/><br/><br/><br/>
+
+Simple (plug-in) approach: Assume $f$ is a $N(\mu, \sigma^2)$, then
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+[]{.pagebreak}
+
+Data driven approach:
+
+
+[]{.pagebreak}
+
+
+# Frequency Polygon
+
+The histogram is simple, useful and piecewise constant.
+
+<br/><br/><br/><br/>
+
+```{r, message=FALSE, warning=FALSE, fig.height=2.5}
+library(ISLR)
+
+# optimal h based on normal method
+h_0 <- 3.491 * sd(Hitters$Salary, na.rm = TRUE) * sum(!is.na(Hitters$Salary))^(-1/3)
+
+## original histogram with optimal h
+ggplot(Hitters) +
+  geom_histogram(aes(Salary), binwidth = h_0) -> p
+
+## get values to build freq polygon
+vals <- ggplot_build(p)$data[[1]]
+poly_dat <- data.frame(x = c(vals$x[1] - h_0, 
+                             vals$x, vals$x[nrow(vals)] + h_0),
+                       y = c(0, vals$y, 0))
+
+## plot freq polygon
+p + geom_line(aes(x, y), data = poly_dat, colour = "red")
+```
+
+[]{.pagebreak}
+
+Let $b_1, \dots, b_{K + 1}$ represent bin edges of bins with width $h$ and $n_1, \dots, n_K$ be the number of observations falling into the bins. Let $c_0, \dots, c_{k + 1}$ be the midpoints of the bin interval.
+
+<br/><br/><br/>
+
+The frequency polygon is defined as
+
+<br/><br/><br/><br/><br/><br/>
+
+MISE
+
+<br/><br/><br/><br/><br/><br/>
+
+AMISE
+
+<br/><br/><br/><br/><br/><br/>
+
+Gaussian rule for binwidth
+
+
+[]{.pagebreak}
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+# optimal h based on normal method
+h_0 <- 2.15 * sd(Hitters$Salary, na.rm = TRUE) * sum(!is.na(Hitters$Salary))^(-1/5)
+
+## original histogram with optimal h
+ggplot(Hitters) +
+  geom_histogram(aes(Salary), binwidth = h_0) -> p
+
+## get values to build freq polygon
+vals <- ggplot_build(p)$data[[1]]
+poly_dat <- data.frame(x = c(vals$x[1] - h_0, 
+                             vals$x, vals$x[nrow(vals)] + h_0),
+                       y = c(0, vals$y, 0))
+
+## plot freq polygon
+ggplot() + geom_line(aes(x, y), data = poly_dat) + xlab("Salary") + ylab("Count")
+```
+
+
+[]{.pagebreak}
+
+In practice, a simple way to construct locally varying binwidth histograms is by transforming the data to a different scale and then smoothing the transformed data. The final estimate is formed by simply transforming the constructed bin edges $\{b_j\}$ back to the original scale.
+
+<br/><br/><br/>
+
+```{r, fig.show='hold', echo=FALSE, warning = FALSE, message=FALSE, fig.height=2}
+ggplot() + geom_line(aes(x, y), data = poly_dat) + xlab("Salary") + ylab("Count")
+
+h_0_log <- 2.15 * sd(log(Hitters$Salary, base = 10), na.rm = TRUE) * sum(!is.na(Hitters$Salary))^(-1/5)
+
+## original histogram with optimal h
+ggplot(Hitters) +
+  geom_histogram(aes(log(Salary, base = 10)), binwidth = h_0_log) -> p_log
+
+## get values to build freq polygon
+vals <- ggplot_build(p_log)$data[[1]]
+poly_dat_log <- data.frame(x = c(vals$x[1] - h_0_log, 
+                                 vals$x, vals$x[nrow(vals)] + h_0_log),
+                           y = c(0, vals$y, 0))
+
+
+## plot freq polygon
+ggplot() + geom_line(aes(x, y), data = poly_dat_log) + xlab("log(Salary)") + ylab("Count")
+
+## transform back
+poly_dat_bak <- data.frame(x = c(vals$x[1] - h_0_log, 
+                                 vals$x, vals$x[nrow(vals)] + h_0_log),
+                           y = c(0, vals$y, 0)) |>
+  mutate(x = 10^x)
+
+ggplot() + geom_line(aes(x, y), data = poly_dat_bak) + xlab("Salary") + ylab("Count")
+
+```
+
+# Kernel Density Estimation {.page-break-before}
+
+## Choice of Bandwidth
+
+### Cross Validation
+
+### Plug-in Methods
+
+## Maximal Smoothing Principle
+
+## Choice of Kernel
+
+### Epanechnikov Kernel
+
+### Canonical Kernels
