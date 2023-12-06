@@ -1,0 +1,177 @@
+---
+title: "Tree-based Methods"
+output:
+  pagedown::html_paged:
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+set.seed(333)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+Tree-based methods partition the feature space into a set of rectangles and then fit a simple model (like a constant) in each one.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Combining a large number of trees can often result in dramatic improvements in prediction accuracy at the expense of interpretation.
+
+<br/><br/><br/><br/><br/>
+
+Decision trees can be applied to both regression and classification problems. We will start with regression.
+
+
+# Decision Trees {.page-break-before}
+
+Let's consider a regression problem with continuous response $Y$ and inputs $X_1$ and $X_2$, each taking values in the unit interval.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In each partition, we can model $Y$ with a different constant. However, there is a problem:
+
+<br/><br/><br/><br/>
+
+To simplify, we restrict attention to binary partitions.
+
+<br/><br/><br/><br/><br/><br/><br/>
+
+The result is a partition into five regions $R_1, \dots, R_5$. The corresponding regression model predicts $Y$ with a constant $c_m$ in region $R_m$:
+
+
+\newpage
+
+## Regression Trees
+
+How should we grow a regression tree? Our data consists of $p$ inputs for $i = 1, \dots, n$. We need an automatic way to decide which variables to split on and where to split them.
+
+Suppose we have a partition into $M$ regions and we model the response as a constant in each region.
+
+<br/><br/><br/><br/>
+
+Finding the best binary partition in terms of minimum sums of squares is generally computationally infeasible.
+
+\newpage
+
+The process described above may produce good predictions on the training set, but is likely to overfit the data.
+
+<br/>
+
+A smaller tree, with less splits might lead to lower variance and better interpretation at the cost of a little bias.
+
+<br/><br/><br/><br/>
+
+A strategy is to grow a very large tree $T_0$ and then *prune* it back to obtain a *subtree*.
+
+\newpage
+
+## Classification Trees
+
+If the target is a classification outcome taking values $1, 2, \dots, K$, the only changes needed in the tree algorithm are the criteria for splitting, pruning, and $c_m$.
+
+$c_m$:
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Node impurity (Splitting):
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Pruning:
+
+
+
+
+# Bagging {.page-break-before}
+
+Decision trees suffer from *high variance*.
+
+<br/><br/><br/><br/>
+
+*Bootstrap aggregation* or *bagging* is a general-purpose procedure for reducing the variance of a statistical learning method, particularly useful for trees.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+So a natural way to reduce the variance is to take many training sets from the population, build a separate prediction model using each training set, and average the resulting predictions.
+
+<br/><br/><br/><br/><br/><br/>
+
+Of course, this is not practical because we generally do not have access to multiple training sets.
+
+\newpage
+
+While bagging can improve predictions for many regression methods, it's particularly useful for decision trees.
+
+<br/><br/><br/><br/>
+
+These trees are grown deep and not pruned.
+
+<br/><br/><br/><br/>
+
+How can bagging be extended to a classification problem?
+
+<br/><br/><br/><br/>
+
+## Out-of-Bag Error
+
+There is a very straightforward way to estimate the test error of a bagged model.
+
+\newpage
+
+## Interpretation
+
+\newpage
+
+# Random Forests
+
+*Random forests* provide an improvement over bagged trees by a small tweak that decorrelates the trees.
+
+<br/>
+
+As with bagged trees, we build a number of decision trees on bootstrapped training samples.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In other words, in building a random forest, at each split in the tree, the algorithm is not allowed to consider a majority of the predictors.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The main difference between bagging and random forests is the choice of predictor subset size $m$.
+
+
+# Boosting {.page-break-before}
+
+The basic idea of *boosting* is to take a simple (and poorly performing form of) predictor and by sequentially modifying/perturbing it and re-weighting (or modifying) the training data set, to creep toward an effective predictor.
+
+Consider a 2-class $0$-$1$ loss classification problem. We'll suppose that output $y$ takes values in $\mathcal{G=}\left\{-1,1\right\}$. The AdaBoost.M1 algorithm is built on some base classifier form. 
+
+<br/><br/><br/><br/>
+
+1. Initialize the weights on the training data.
+
+<br/><br/>
+
+2. Fit a $\mathcal{G}$-valued predictor/classifier $\hat{f}_1$ to the training data to optimize the $0$-$1$ loss.
+
+<br/><br/>
+
+3. Set new weights on the training data.
+
+<br/><br/>
+
+4. For $m = 2, \dots, M$,
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+5. Output an updated classifier based on "weighted voting".
+
+\newpage
+
+Why might this work?
