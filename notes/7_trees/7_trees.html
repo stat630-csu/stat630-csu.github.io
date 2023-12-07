@@ -32505,7 +32505,87 @@ break-after: always;
 <li>Output an updated classifier based on “weighted voting”.</li>
 </ol>
 <div class="page-break-after"></div>
-<p>Why might this work?</p>
+<div id="why-might-this-work" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Why might this work?</h2>
+<p>For <span class="math inline">\(g\)</span> an arbitrary function of <span class="math inline">\(\boldsymbol{x}\)</span>, consider a classifier built using <span class="math inline">\(g\)</span> as a voting function, e.g. <span class="math inline">\(f(\boldsymbol x) = \text{sign}(g(\boldsymbol x))\)</span>, ignoring the possibility that <span class="math inline">\(g(\boldsymbol x)=0\)</span>. Then
+<span class="math display">\[
+\mathbb I(y \not= \hat y) = \mathbb{I}(yg(\boldsymbol x) &lt; 0).
+\]</span></p>
+<p>Using the following fact,
+<span class="math display">\[
+\mathbb{I}(u &lt; 0) \le \exp(-u)\  \forall u,
+\]</span>
+provided <span class="math inline">\(P(g(\boldsymbol X) = 0) = 0\)</span>, the <span class="math inline">\(0\)</span>-<span class="math inline">\(1\)</span> loss error rate for <span class="math inline">\(f(\boldsymbol x)\)</span> is
+<span class="math display">\[
+\text{E}[\mathbb{I}(Y \not= \hat Y)] = \text{E}[\mathbb{I}(Y g(\boldsymbol X) &lt; 0)] \le \text{E}[\exp(-Y g(\boldsymbol X)].
+\]</span>
+In other words, the error rate is bounded above by expected exponential loss. AdaBoost works by <strong>providing a voting function that produces a small value of this bound</strong>.</p>
+<p><br /></p>
+<p>To see this, we need to identify for each <span class="math inline">\(\boldsymbol{u}\)</span> a value <span class="math inline">\(a\)</span> that optimizes <span class="math inline">\(\text{E}\left[ \exp\left(-aY\right) |\boldsymbol{X}=\boldsymbol{u}\right]\)</span>, where
+<span class="math display">\[
+\text{E}\left[\exp\left(-aY\right)|\boldsymbol{X}=\boldsymbol{u}\right] =
+\exp\left(-a\right)  P\left[  Y=1|\boldsymbol{X}=\boldsymbol{u}\right]  + \exp\left(  a\right)  P\left[  Y=-1|\boldsymbol{X}=\boldsymbol{u}\right].
+\]</span>
+An optimal <span class="math inline">\(a\)</span> is easily seen to be half the log odds ratio, i.e. the <span class="math inline">\(g\)</span>
+optimizing the upper bound is
+<span class="math display">\[
+g\left(  \boldsymbol{u}\right)  =\frac{1}{2}\ln\left(  \frac{P\left[
+yY=1|\boldsymbol{X}=\boldsymbol{u}\right]  }{P\left[  Y=-1|\boldsymbol{X}=\boldsymbol{u}\right]  }\right).
+\]</span></p>
+<p><br /></p>
+<p>Now consider “base classifiers” <span class="math inline">\(h_{\ell}\left( \boldsymbol{x},\boldsymbol{\gamma}_{\ell}\right)\)</span> taking values in <span class="math inline">\(\mathcal{G}=\left\{-1,1\right\}\)</span> with parameters <span class="math inline">\(\boldsymbol{\gamma}_{l}\)</span> and functions built from them of the form
+<span class="math display">\[
+g_{m}\left(\boldsymbol{x}\right)=\sum_{l=1}^{m}\beta_{\ell}h_{\ell}\left(\boldsymbol{x},\boldsymbol{\gamma}_{\ell}\right).
+\]</span>
+for training-data-dependent <span class="math inline">\(\beta_{l}\)</span> and <span class="math inline">\(\boldsymbol{\gamma}_{l}\)</span>.</p>
+<p>Then, <span class="math inline">\(g_{m}\left( \boldsymbol{x}\right) =g_{m-1}\left( \boldsymbol{x}\right) + \beta_{m}h_{m}\left(\boldsymbol{x},\boldsymbol{\gamma}_{m}\right)\)</span>. Thus, successive <span class="math inline">\(g\)</span>’s are perturbations of the previous ones.</p>
+<p>How can we define the perturbations to produce small values of the upper bound of our error (<span class="math inline">\(\text{E}[\exp(-Y g(\boldsymbol X)]\)</span>)?</p>
+<p>Well, we don’t have a complete probability model for <span class="math inline">\(\left(\boldsymbol{X}, Y\right)\)</span> (if we did, we would be done). So, let’s optmize an empirical version of this bound.
+<span class="math display">\[\begin{align*}
+E_{m}&amp;=\sum_{i=1}^{n}\exp\left(-y_{i}g_{m}\left(\boldsymbol{x}_{i}\right)\right) \tag{Now based on training data.} \\
+&amp;=\sum_{i=1}^{n}\exp\left(  -y_{i}g_{m-1}\left(  \boldsymbol{x}_{i}\right)  -y_{i}\beta_{m}h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  \right)  \\
+&amp;  =\sum_{i=1}^{n}\exp\left(  -y_{i}g_{m-1}\left(  \boldsymbol{x}_{i}\right)\right)  \exp\left(  -y_{i}\beta_{m}h_{m}\left(  \boldsymbol{x},\boldsymbol{\gamma}_{m}\right)  \right),
+\end{align*}\]</span>
+and let’s call <span class="math inline">\(v_{im} = \exp\left( -y_{i}g_{m-1}\left( \boldsymbol{x}_{i}\right)\right)\)</span>.</p>
+<p>We will consider optimal choice of <span class="math inline">\(\boldsymbol{\gamma}_{m}\)</span> and <span class="math inline">\(\beta_{m}&gt;0\)</span> for purposes of making <span class="math inline">\(g_{m}\)</span> the best possible perturbation of <span class="math inline">\(g_{m-1}\)</span> in terms of minimizing <span class="math inline">\(E_{m}\)</span>.</p>
+<ol style="list-style-type: decimal">
+<li><p>Choice of <span class="math inline">\(\boldsymbol \gamma_m\)</span>:</p>
+<p><span class="math display">\[\begin{align*}
+E_{m} &amp;=\sum_{\substack{i\text{ with}\\h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  =y_{i}}}v_{im}\exp\left(  -\beta_{m}\right)  +\sum_{\substack{i\text{ with}\\h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  \neq y_{i}}}v_{im}\exp\left(  \beta_{m}\right)  \\
+&amp;  =\left(  \exp\left(  \beta_{m}\right)  -\exp\left(  -\beta_{m}\right)\right)  \sum_{i=1}^{n}v_{im}I\left[  h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  \neq y_{i}\right]+\exp\left(  -\beta_{m}\right)  \sum_{i=1}^{n}v_{im}
+\end{align*}\]</span></p>
+<p>Independentof <span class="math inline">\(\beta_m\)</span> we need <span class="math inline">\(\boldsymbol \gamma_m\)</span> to minimize the <span class="math inline">\(v_{im}\)</span>-weighted error rate of <span class="math inline">\(h_m(\boldsymbol x, \boldsymbol \gamma_m)\)</span>. Call the optimized version <span class="math inline">\(h_m(\boldsymbol x)\)</span>. <strong>This is the same as step 4a. in AdaBoost.m1.</strong></p></li>
+<li><p>Choice of <span class="math inline">\(\beta_m\)</span>:</p>
+<p><span class="math display">\[\begin{align*}
+E_m &amp;=  \exp\left(-\beta_m\right)  \left(  \sum_{\substack{i\text{ with}\\h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  =y_{i}}}v_{im}+\sum_{\substack{i\text{ with}\\h_{m}\left(  \boldsymbol{x}_{i},\boldsymbol{\gamma}_{m}\right)  \neq y_{i}}}v_{im}\exp\left(  2\beta_{m}\right)  \right)  \\
+  &amp; =\exp\left(-\beta_m\right)  \left( \sum_{i=1}^{n}v_{im}+\sum_{i=1}^{n}v_{im}\left(  \exp\left(  2\beta_{m}\right)  -1\right)  I\left[h_{m}\left(  \boldsymbol{x}_{i}\right)  \neq y_{i}\right]  \right)
+\end{align*}\]</span>
+and minimization of <span class="math inline">\(E_m\)</span> is equivalent to minimization of
+<span class="math display">\[
+\exp\left(  -\beta_m\right)  \left(  1+\left(  \exp\left(  2\beta_{m}\right)-1\right) \frac{\sum_{i=1}^{N}v_{im}I\left[  h_{m}\left(  \boldsymbol{x}_{i}\right)  \neq y_{i}\right]}{\sum_{i=1}^{N}v_{im}}\right).
+\]</span>
+Let
+<span class="math display">\[
+\overline{\text{err}}_{m}^{h_{m}}=\frac{\sum_{i=1}^{n}v_{im}I\left[h_{m}\left(  \boldsymbol{x}_{i}\right)  \neq y_{i}\right]  }{\sum_{i=1}^{n}v_{im}},
+\]</span>
+then a bit of calculus shows that the optimizing <span class="math inline">\(\beta_m\)</span> is
+<span class="math display">\[
+\beta_{m}=\frac{1}{2}\ln\left(\frac{1-\overline{\text{err}}_{m}^{h_{m}}}{\overline{\text{err}}_{m}^{h_{m}}}\right).
+\]</span>
+Notice this coefficient is **exactly <span class="math inline">\(\frac{\alpha_m}{2}\)</span> from step 4b. and 4c. in AdaBoost.m1 (and the <span class="math inline">\(\frac{1}{2}\)</span> is irrelevant for the sign).</p></li>
+<li><p>Updating weights <span class="math inline">\(v_{im}\)</span>:</p>
+<p>Note that
+<span class="math display">\[\begin{align*}
+v_{i\left(  m+1\right)  } &amp;  =\exp\left(  -y_{i}g_{m}\left(  \boldsymbol{x}_{i}\right)  \right)  \\
+&amp;  =\exp\left(  -y_{i}\left(  g_{m-1}\left(  \boldsymbol{x}_{i}\right) +\beta_{m}h_{m}\left(  \boldsymbol{x}_{i}\right)  \right)  \right)  \\
+&amp;  =v_{im}\exp\left(  -y_{i}\beta_{m}h_{m}\left(  \boldsymbol{x}_{i}\right)\right)  \\
+&amp;  =v_{im}\exp\left(  \beta_{m}\left(  2I\left[  h_{m}\left(  \boldsymbol{x}_{i}\right)  \neq y_{i}\right]  -1\right)  \right)  \\
+&amp;  =v_{im}\exp\left(  2\beta_{m}I\left[  h_{m}\left(  \boldsymbol{x}_{i}\right)  \neq y_{i}\right]  \right)  \exp\left(  -\beta_{m}\right).
+\end{align*}\]</span>
+Since <span class="math inline">\(\exp\left(-\beta_{m}\right)\)</span> is constant across <span class="math inline">\(i\)</span>, it is irrelevant to weighting, and since the prescription for <span class="math inline">\(\beta_{m}\)</span> produces half what AdaBoost prescribes in 4b. for <span class="math inline">\(\alpha_{m}\)</span>, the weights used in the choice of <span class="math inline">\(\beta_{m+1}\)</span> and <span class="math inline">\(h_{m+1}\left( \boldsymbol{x},\boldsymbol{\gamma}_{m+1}\right)\)</span> are exactly as in AdaBoost. Since <span class="math inline">\(g_{1}\)</span> corresponds to the first AdaBoost step, <span class="math inline">\(g_{M}\)</span> is <span class="math inline">\(1/2\)</span> of the AdaBoost voting function and the <span class="math inline">\(g_{m}\)</span>’s generate the same classifier as the AdaBoost algorithm.</p></li>
+</ol>
+<p>So, in conclusion, we have found <span class="math inline">\(g_M\)</span> (a positive multiple of the AdaBoost voting function) which optimizes an empirical version of <span class="math inline">\(\text{E}\exp(-Yg(\boldsymbol X))\)</span>, the upper bound on our error rate!</p>
+</div>
 </div>
 </div>
 
