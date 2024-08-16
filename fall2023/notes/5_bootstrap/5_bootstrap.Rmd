@@ -1,0 +1,746 @@
+---
+title: "Bootstrap Methods"
+output:
+  pagedown::html_paged:
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+set.seed(333)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+Typically we use (asymptotic) theory to derive the sampling distribution of a statistic. From the sampling distribution, we can obtain the variance, construct confidence intervals, perform hypothesis tests, and more.
+
+**Challenge:**
+
+
+<br/><br/><br/>
+
+**Basic idea of bootstrapping:**
+
+
+[ ]{.pagebreak}
+
+**"Bootstrap World"**
+
+
+[ ]{.pagebreak}
+
+# Nonparametric Bootstrap
+
+Let $Y_1, \dots, Y_n \sim F$ with pdf $f(y)$. Recall, the empirical cdf is defined as
+
+<br/><br/><br/><br/><br/><br/>
+
+
+<br/><br/><br/>
+
+Theoretical: <br/><br/>
+
+Bootstrap: <br/><br/>
+
+<br/><br/><br/><br/><br/><br/>
+
+The idea behind the nonparametric bootstrap is to sample many data sets from $F_n(y)$, which can be achieved by resampling from the data **with replacement**.
+
+
+[ ]{.pagebreak}
+
+```{r, fig.height=2.5}
+# observed data
+x <- c(2, 2, 1, 1, 5, 4, 4, 3, 1, 2)
+
+# create 10 bootstrap samples
+x_star <- matrix(NA, nrow = length(x), ncol = 10)
+for(i in 1:10) {
+  x_star[, i] <- sample(x, length(x), replace = TRUE)
+}
+x_star
+
+# compare mean of the same to the means of the bootstrap samples
+mean(x)
+colMeans(x_star)
+
+ggplot() + 
+  geom_histogram(aes(colMeans(x_star)), binwidth = .05) +
+  geom_vline(aes(xintercept = mean(x)), lty = 2, colour = "red") +
+  xlab("Sampling distribution of the mean via bootstrapping")
+
+```
+
+## Algorithm
+
+**Goal:** estimate the sampling distribution of a statistic based on observed data $x_1, \dots, x_n$.
+
+Let $\theta$ be the parameter of interest and $\hat{\theta}$ be an estimator of $\theta$. Then,
+
+[ ]{.pagebreak}
+
+## Justification for iid data
+
+Suppose $Y_1, \dots, Y_n$ are iid with $\text{E}Y_1 = \mu \in \mathbb{R}$, $\text{Var}(Y_1) = \sigma^2 \in (0, \infty)$. Let's approximate the distribution of $T_n = \sqrt{n}(\bar Y_n - \mu)$ via the bootstrap.
+
+[ ]{.poagebreak}
+
+**Theorem:** If $Y_1, Y_2, \dots$ are iid with $\text{Var}(Y_1) = \sigma^2 \in (0, \infty)$, then $\sup\limits_{y\in\mathbb{R}}|P(T_n \le y) - P_*(T_n^* \le y)| \equiv \Delta_n \rightarrow 0$ as $n \rightarrow \infty$ almost surely (a.s).
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+The proof of this theorem requires two facts:
+
+<br/>
+
+(i) (Berry-Esseen Lemma) Let $Y_1, \dots, Y_n$ be independent with $\text{E}Y_i = 0$ and $\text{E}|Y_i|^3 < \infty$ for $i = 1, \dots, n$. Let $\sigma^2_n = n \text{Var}(\bar Y_n) = n^{-1}\sum_{i = 1}^n \text{E}Y_i^2 > 0$. Then,
+    $$
+    \sup\limits_{y \in \mathbb{R}} \left|P\left(\frac{\sqrt{n} \bar Y_n}{\sigma_n} \le y\right) - \Phi(y)\right| = \sup\limits_{x \in \mathbb{R}} \left|P\left(\sqrt{n} \bar Y_n \le x\right) - \Phi\left(\frac{x}{\sigma_n}\right)\right| \le \frac{2.75}{n^{3/2}\sigma_n^3} \sum\limits_{i = 1}^n \text{E}|Y_i|^3.
+    $$
+
+<br/>
+
+(ii) (Marcinkiewicz-Zygmund SLLN) Let $X_i$ be a sequence of iid random variables with $\text{E}|X_i|^p < \infty$ for $p \in (0, 2)$. Then, for $S_n = \sum_{i = 1}^n X_i$,
+    $$
+    \frac{1}{n^{1/p}}(S_n - nc) \rightarrow 0 \text{ as } n\rightarrow \infty \text{ almost surely } (*)
+    $$
+    for any $c \in \mathbb{R}$ if $p \in (0,1)$ and for $c = \text{E}X_1$ if $p \in [1, 2)$. If $(*)$ holds for some $c \in \mathbb{R}$, then $\text{E}|X_1|^p < \infty$.
+    
+\newpage
+
+\newpage
+
+## Properties of Estimators {.page-break-before}
+
+We can use the bootstrap to estimate different properties of estimators.
+
+### Standard Error
+
+Recall $se(\hat{\theta}) = \sqrt{Var(\hat{\theta})}$. We can get a **bootstrap** estimate of the standard error:
+
+<br/><br/><br/><br/><br/><br/>
+
+### Bias
+
+Recall $\text{bias}(\hat{\theta}) = E[\hat{\theta} - \theta] = E[\hat{\theta}] - \theta$. We can get a **bootstrap** estimate of the bias:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Overall, we seek statistics with small se and small bias. 
+
+
+## Sample Size and # Bootstrap Samples {.page-break-before}
+
+$$
+n = \text{sample size} \quad \& \quad B = \# \text{ bootstap samples}
+$$
+
+If $n$ is too small, or sample isn't representative of the population,
+
+<br/><br/><br/><br/>
+
+Guidelines for $B$ -- 
+
+<br/><br/><br/><br/>
+
+Best approach -- 
+
+[ ]{.pagebreak}
+
+[**Your Turn**]{.yourturn}
+
+In this example, we explore bootstrapping in the rare case where we know the values for the entire population. If you have all the data from the population, you don't need to bootstrap (or really, inference). It is useful to learn about bootstrapping by comparing to the truth in this example.
+
+In the package `bootstrap` is contained the average LSAT and GPA for admission to the population of $82$ USA Law schools (an old data set -- there are now over $200$ law schools). This package also contains a random sample of size $n = 15$ from this dataset.
+
+```{r, fig.height = 2.5}
+library(bootstrap)
+
+head(law)
+
+ggplot() +
+  geom_point(aes(LSAT, GPA), data = law) +
+  geom_point(aes(LSAT, GPA), data = law82, pch = 1)
+```
+
+We will estimate the correlation $\theta = \rho(\text{LSAT}, \text{GPA})$ between these two variables and use a bootstrap to estimate the sample distribution of $\hat{\theta}$.
+
+```{r}
+# sample correlation
+cor(law$LSAT, law$GPA)
+
+# population correlation
+cor(law82$LSAT, law82$GPA)
+```
+
+```{r}
+# set up the bootstrap
+B <- 200
+n <- nrow(law)
+r <- numeric(B) # storage
+
+for(b in B) {
+  ## Your Turn: Do the bootstrap!
+}
+```
+
+
+1. Plot the sample distribution of $\hat{\theta}$. Add vertical lines for the true value $\theta$ and the sample estimate $\hat{\theta}$.
+ 
+1. Estimate $sd(\hat{\theta})$.
+
+1. Estimate the bias of $\hat{\theta}$
+
+[ ]{.pagebreak}
+
+## Bootstrap CIs
+
+We will look at five different ways to create confidence intervals using the boostrap and discuss which to use when.
+
+<br/><br/>
+
+1. Percentile Bootstrap CI
+
+1. Basic Bootstrap CI
+
+1. Standard Normal Bootstrap CI
+
+1. Bootstrap $t$
+
+1. Accelerated Bias-Corrected (BCa)
+
+<br/><br/>
+
+**Key ideas:**
+
+[ ]{.pagebreak}
+
+### Percentile Bootstrap CI
+
+Let $\hat{\theta}^{(1)}, \dots, \hat{\theta}^{(B)}$ be bootstrap replicates and let $\hat{\theta}_{\alpha/2}$ be the $\alpha/2$ quantile of $\hat{\theta}^{(1)}, \dots, \hat{\theta}^{(B)}$.
+
+Then, the $100(1 - \alpha)\%$ Percentile Bootstrap CI for $\theta$ is
+
+<br/><br/><br/><br/>
+
+In `R`, if `bootstrap.reps = c(`$\hat{\theta}^{(1)}, \dots, \hat{\theta}^{(B)}$`)`, the percentile CI is
+
+```{r, eval=FALSE}
+quantile(bootstrap.reps, c(alpha/2, 1 - alpha/2))
+```
+
+<br/><br/>
+
+**Assumptions/usage**
+
+[ ]{.pagebreak}
+
+### Basic Bootstrap CI
+
+The $100(1 - \alpha)\%$ Basic Bootstrap CI for $\theta$ is
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Assumptions/usage**
+
+[ ]{.pagebreak}
+
+### Bootstrap $t$ CI (Studentized Bootstrap)
+
+Even if the distribution of $\hat{\theta}$ is Normal and $\hat{\theta}$ is unbiased for $\theta$, the Normal distribution is not exactly correct for $z$.
+
+<br/><br/>
+
+Additionally, the distribution of $\hat{se}(\hat{\theta})$ is unknown.
+
+<br/><br/>
+
+$\Rightarrow$ The bootstrap $t$ interval does not use a Student $t$ distribution as the reference distribuion, instead we estimate the distribution of a "t type" statistic by resampling.
+
+<br/>
+
+The $100(1 - \alpha)\%$ Boostrap $t$ CI is
+
+<br/><br/><br/><br/>
+
+**Overview**
+
+<br/><br/><br/>
+
+To estimate the "t style distribution" for $\hat{\theta}$,
+
+[ ]{.pagebreak}
+
+**Assumptions/usage**
+
+[ ]{.pagebreak}
+
+### BCa CIs
+
+Modified version of percentile intervals that adjusts for bias of estimator and skewness of the sampling distribution.
+
+This method automatically selects a transformation so that the normality assumption holds.
+
+**Idea:**
+
+[ ]{.pagebreak}
+
+The BCa method uses bootstrapping to estimate the bias and skewness then modifies which percentiles are chosen to get the appropriate confidence limits for a given data set.
+
+**In summary,**
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+[ ]{.pagebreak}
+
+[**Your Turn**]{.yourturn}
+
+We will consider a telephone repair example from Hesterberg (2014). `Verizon` has repair times, with two groups, CLEC and ILEC, customers of the "Competitive" and "Incumbent" local exchange carrier.
+
+```{r, fig.height=2.5, message = FALSE, warning=FALSE}
+library(resample) # package containing the data
+
+data(Verizon)
+head(Verizon)
+
+Verizon |>
+  group_by(Group) |>
+  summarize(mean = mean(Time), sd = sd(Time), min = min(Time), max = max(Time)) |>
+  kable()
+
+ggplot(Verizon) +
+  geom_histogram(aes(Time)) +
+  facet_wrap(.~Group, scales = "free")
+
+ggplot(Verizon) +
+  geom_boxplot(aes(Group, Time))
+```
+
+## Bootstrapping CIs
+
+There are many bootstrapping packages in `R`, we will use the `boot` package. The function `boot` generates $R$ resamples of the data and computes the desired statistic(s) for each sample. This function requires 3 arguments:
+
+1. data = the data from the original sample (data.frame or matrix).
+2. statistic = a function to compute the statistic from the data where the first argument is the data and the second argument is the indices of the obervations in the boostrap sample.
+3. $R$ = the number of bootstrap replicates.
+
+
+```{r, fig.height=2.5}
+library(boot) # package containing the bootstrap function
+
+mean_func <- function(x, idx) {
+  mean(x[idx])
+}
+
+ilec_times <- Verizon[Verizon$Group == "ILEC",]$Time
+boot.ilec <- boot(ilec_times, mean_func, 2000)
+
+plot(boot.ilec)
+```
+
+If we want to get Bootstrap CIs, we can use the `boot.ci` function to generate the different nonparametric bootstrap confidence intervals.
+
+```{r}
+boot.ci(boot.ilec, conf = .95, type = c("perc", "basic", "bca"))
+
+## we can do some of these on our own
+## percentile
+quantile(boot.ilec$t, c(.025, .975))
+
+## basic
+2*mean(ilec_times) - quantile(boot.ilec$t, c(.975, .025))
+
+```
+
+To get the studentized bootstrap CI, we need our statistic function to also return the variance of $\hat{\theta}$.
+
+```{r}
+mean_var_func <- function(x, idx) {
+  c(mean(x[idx]), var(x[idx])/length(idx))
+}
+
+boot.ilec_2 <- boot(ilec_times, mean_var_func, 2000)
+boot.ci(boot.ilec_2, conf = .95, type = "stud")
+```
+
+Which CI should we use?
+
+[ ]{.pagebreak}
+
+## Bootstrapping for the difference of two means
+
+Given iid draws of size $n$ and $m$ from two populations, to compare the means of the two groups using the bootstrap,
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The function `two.boot` in the `simpleboot` package is used to bootstrap the difference between univariate statistics. Use the bootstrap to compute the shape, bias, and bootstrap sample error for the samples from the `Verizon` data set of CLEC and ILEC customers.
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2.4, fig.width=3, fig.show="hold"}
+library(simpleboot)
+
+clec_times <- Verizon[Verizon$Group == "CLEC",]$Time
+diff_means.boot <- two.boot(ilec_times, clec_times, "mean", R = 2000)
+
+ggplot() +
+  geom_histogram(aes(diff_means.boot$t)) +
+  xlab("mean(ilec) - mean(clec)")
+```
+
+```{r}
+# Your turn: estimate the bias and se of the sampling distribution
+```
+
+Which confidence intervals should we use?
+
+
+```{r}
+# Your turn: get the chosen CI using boot.ci
+```
+
+Is there evidence that 
+$$
+H_0: \mu_1 - \mu_2 = 0 \\
+H_a: \mu_1 - \mu_2 < 0
+$$
+is rejected?
+
+[ ]{.pagebreak}
+
+# Parametric Bootstrap
+
+In a **nonparametric bootstrap**, we 
+
+<br/><br/><br/><br/><br/><br/>
+
+In a **parametric bootstrap**, 
+
+<br/><br/><br/><br/><br/><br/>
+
+For both methods,
+
+[ ]{.pagebreak}
+
+## Bootstrapping for linear regression
+
+Consider the regression model $Y_i = \boldsymbol x_i^T\boldsymbol \beta + \epsilon_i, i = 1, \dots, n$ with $\epsilon_i \stackrel{iid}{\sim}N(0, \sigma^2)$.
+
+<br/><br/><br/>
+
+Two approaches for bootstrapping linear regression models -- 
+
+1. <br/><br/>
+
+2. <br/><br/>
+
+### Bootstrapping the residuals
+
+1. Fit the regression model using the original data
+
+2. Compute the residuals from the regression model,
+    $$
+    \hat{\epsilon}_i = y_i - \hat{y}_i = y_i - \boldsymbol x_i^T\hat{\boldsymbol \beta}, \quad i = 1, \dots, n
+    $$
+
+3. Sample $\hat{\epsilon}^*_1, \dots, \hat{\epsilon}^*_n$ with replacement from $\hat{\epsilon}_1, \dots, \hat{\epsilon}_n$.
+
+4. Create the bootstrap sample
+    $$
+    y_i^* = \boldsymbol x_i^T\hat{\boldsymbol \beta} + \epsilon^*_i, \quad i = 1, \dots, n
+    $$
+
+5. Estimate $\hat{\boldsymbol\beta}^*$
+
+6. Repeat steps 2-4 $B$ times to create $B$ bootstrap estimates of $\hat{\beta}$.
+
+**Assumptions:**
+
+[ ]{.pagebreak}
+
+### Paired bootstrapping
+
+Resample $z_i^* = (y_i, \boldsymbol x_i)^*$ from the empirical distribution of the pairs $(y_i, \boldsymbol x_i)$.
+
+<br/><br/><br/><br/>
+
+**Assumptions:**
+
+<br/><br/><br/><br/>
+
+### Which to use?
+
+1. Standard inferences - <br/><br/><br/>
+
+2. Bootstrapping the residuals - <br/><br/><br/><br/><br/><br/>
+
+3. Paired bootstrapping - <br/><br/><br/><br/><br/><br/>
+
+[ ]{.pagebreak}
+
+[**Your Turn**]{.yourturn}
+
+This data set is the Puromycin data in `R`. The goal is to create a regression model about the rate of an enzymatic reaction as a function of the substrate concentration.
+
+```{r, fig.height = 2.5, fig.width=3, fig.show='hold'}
+head(Puromycin)
+dim(Puromycin)
+
+ggplot(Puromycin) +
+  geom_point(aes(conc, rate))
+
+ggplot(Puromycin) +
+  geom_point(aes(log(conc), (rate)))
+```
+
+### Standard regression
+
+```{r, fig.height = 2.5, fig.width = 3.25, fig.show="hold"}
+m0 <- lm(rate ~ conc, data = Puromycin)
+plot(m0)
+summary(m0)
+confint(m0)
+
+m1 <- lm(rate ~ log(conc), data = Puromycin)
+plot(m1)
+summary(m1)
+confint(m1)
+```
+
+### Paired bootstrap {.page-break-before}
+
+```{r}
+# Your turn
+library(boot)
+
+reg_func <- function(dat, idx) {
+  # write a regression function that returns fitted beta
+}
+
+# use the boot function to get the bootstrap samples
+
+# examing the bootstrap sampling distribution, make histograms
+
+# get confidence intervals for beta_0 and beta_1 using boot.ci
+
+```
+
+### Bootstrapping the residuals
+
+```{r}
+# Your turn
+library(boot)
+
+reg_func_2 <- function(dat, idx) {
+  # write a regression function that returns fitted beta
+  # from fitting a y that is created from the residuals
+  
+}
+
+# use the boot function to get the bootstrap samples
+
+# examing the bootstrap sampling distribution, make histograms
+
+# get confidence intervals for beta_0 and beta_1 using boot.ci
+
+```
+
+
+# Bootstrapping Dependent Data {.page-break-before}
+
+Suppose we have dependent data $\boldsymbol y = (y_1, \dots, y_n)$ generated from some unknown distribution $F = F_{\boldsymbol Y} = F_{(Y_1, \dots, Y_n)}$.
+
+<br/><br/><br/><br/>
+
+**Goal:**
+
+<br/><br/><br/><br/>
+
+**Challenge:**
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+We will consider 2 approaches
+
+[ ]{.pagebreak}
+
+```{example}
+Suppose we observe a time series $\boldsymbol Y = (Y_1, \dots, Y_n)$ which we assume is generated by an AR(1) process, i.e.,
+```
+<br/><br/>
+Why not just move forward with our nonparametric bootstrap procedure?
+
+[ ]{.pagebreak}
+
+## Model-based approach
+
+If we assume an AR(1) model for the data, we can consider a method similar to bootstrapping residuals for linear regression.
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/>
+<br/>
+
+**Model-based** -- the performance of this approach depends on the model being appropriate for the data.
+
+## Nonparametric approach
+
+To deal with dependence in the data, we will employ a nonparametric *block* bootstrap.
+
+**Idea:**
+
+<br/><br/><br/><br/>
+
+### Nonoverlapping Blocks (NBB)
+
+Consider splitting $\boldsymbol Y = (Y_1, \dots, Y_n)$ in $b$ consecutive blocks of length $\ell$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+We can then rewrite the data as $\boldsymbol Y = (\boldsymbol B_1, \dots, \boldsymbol B_b)$ with $\boldsymbol B_k = (Y_{(k-1)\ell + 1}, \dots, Y_{k\ell})$, $k = 1, \dots, b$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Note, the order of data within the blocks must be maintained, but the order of the blocks that are resampled does not matter.
+
+### Moving Blocks (MBB)
+
+Now consider splitting $\boldsymbol Y = (Y_1, \dots, Y_n)$ into overlapping blocks of adjacent data points of length $\ell$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+We can then write the blocks as $\boldsymbol B_k = (Y_k,\dots, Y_{k + \ell -1})$, $k = 1, \dots, n - \ell + 1$.
+
+[ ]{.pagebreak}
+
+### Choosing Block Size
+
+If the block length is too short,
+
+<br/><br/>
+
+If the block length is too long,
+
+<br/><br/><br/><br/><br/><br/>
+
+[ ]{.pagebreak}
+
+[**Your Turn**]{.yourturn}
+
+We will look at the annual numbers of lynx trappings for 1821–1934 in Canada. Taken from Brockwell & Davis (1991).
+
+```{r}
+data(lynx)
+plot(lynx)
+```
+
+**Goal:** Estimate the sample distribution of the mean
+
+```{r}
+theta_hat <- mean(lynx)
+theta_hat
+```
+
+### Independent Bootstrap {.page-break-before}
+
+```{r}
+library(simpleboot)
+B <- 10000
+
+## Your turn: perform the independent bootstap
+## what is the bootstrap estimate se?
+
+
+```
+
+We must account for the dependence to obtain a correct estimate of the variance!
+
+```{r}
+acf(lynx)
+```
+
+The acf (autocorrelation) in the dominant terms is positive, so we are *underestimating* the standard error.
+
+### Non-overlapping Block Bootstrap {.page-break-before}
+
+```{r}
+# function to create non-overlapping blocks
+nb <- function(x, b) {
+  n <- length(x)
+  l <- n %/% b
+  
+  blocks <- matrix(NA, nrow = b, ncol = l)
+  for(i in 1:b) {
+    blocks[i, ] <- x[((i - 1)*l + 1):(i*l)]
+  }
+  blocks
+}
+
+# Your turn: perform the NBB with b = 10 and l = 11
+theta_hat_star_nbb <- rep(NA, B)
+nb_blocks <- nb(lynx, 10)
+for(i in 1:B) {
+  # sample blocks
+  # get theta_hat^*
+}
+
+# Plot your results to inspect the distribution
+# What is the estimated standard error of theta hat? The Bias?
+
+```
+
+### Moving Block Bootstrap {.page-break-before}
+
+```{r}
+# function to create overlapping blocks
+mb <- function(x, l) {
+  n <- length(x)
+  blocks <- matrix(NA, nrow = n - l + 1, ncol = l)
+  for(i in 1:(n - l + 1)) {
+    blocks[i, ] <- x[i:(i + l - 1)]
+  }
+  blocks
+}
+
+# Your turn: perform the MBB with l = 11
+mb_blocks <- mb(lynx, 11)
+theta_hat_star_mbb <- rep(NA, B)
+for(i in 1:B) {
+  # sample blocks
+  # get theta_hat^*
+}
+
+# Plot your results to inspect the distribution
+# What is the estimated standard error of theta hat? The Bias?
+```
+
+### Choosing the Block size {.page-break-before}
+
+```{r}
+# Your turn: Perform the mbb for multiple block sizes l = 1:12
+# Create a plot of the se vs the block size. What do you notice?
+```
+
+
+
+[ ]{.pagebreak}
+
+# Summary
+
+Bootstrap methods are simulation methods for frequentist inference.
+
+Bootstrap methods are useful for
+
+<br/><br/><br/><br/><br/><br/>
+
+Bootstrap methods can fail when
+
+[ ]{.pagebreak}
+

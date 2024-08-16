@@ -1,0 +1,130 @@
+---
+title: "Empirical Likelihood"
+output:
+  pagedown::html_paged:
+    # change to true for a self-contained document, but it'll be a litte slower for Pandoc to render
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message = FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(broom)
+set.seed(333)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+<br/><br/><br/><br/><br/><br/>
+
+# Mean Case
+
+Suppose $\boldsymbol Y_1, \dots, \boldsymbol Y_n$ are iid with mean $\boldsymbol \mu$ and covariance-variance $\Sigma$. For simplicity, say we are interested in estimating $\boldsymbol \mu$.
+
+\newpage
+
+To perform *nonparametric* likelihood inference on $\boldsymbol \mu$, we can consider a constrained multinomial likelihood, known as the **Empirical Likelihood function of $\boldsymbol \mu$:**
+$$
+L_n(\boldsymbol \mu | \boldsymbol Y) = \sup\left\{\prod\limits_{i = 1}^n p_i: p_i \mapsto \boldsymbol Y_i, \quad \sum\limits_{i = 1}^n p_i = 1, \quad \sum\limits_{i = 1}^n \boldsymbol Y_ip_i = \boldsymbol \mu\right\}.
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The largest possible value of $L_n(\boldsymbol \mu | \boldsymbol Y)$ is
+
+\newpage
+
+
+# Statistical Inference
+
+We can form an EL ratio for $\boldsymbol \mu$
+$$
+R_n(\boldsymbol \mu) = \frac{L_n(\boldsymbol \mu | \boldsymbol Y)}{L_n(\hat{\boldsymbol \mu} | \boldsymbol Y)}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Theorem (Wilk's Theorem):** If $\boldsymbol Y_1, \dots, \boldsymbol Y_n \in \mathbb{R}^q$ are iid with mean $\boldsymbol \mu_0$ and covariance-variance $\Sigma$ where $\text{rank}(\Sigma) = q$, then 
+$$
+-2\log R_n(\boldsymbol \mu_0) \stackrel{d}{\rightarrow} \chi^2_q \text{ as } n \rightarrow \infty.
+$$
+
+
+# EL with Estimating Equations {.page-break-before}
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+For EL inference on $\boldsymbol \theta \in \mathbb{R}^b$, we make an EL function
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Then we can get a point estimate, EL ratio, and corresponding CIs, as well as "profile" EL:
+
+\newpage
+
+**Theorem:** Suppose  $\boldsymbol Y_1, \boldsymbol Y_2, \dots \in \mathbb{R}^q$ are iid with $\text{E}\boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta_0) = \boldsymbol 0_r$ and $\text{Var}[\boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta_0)] = \text{E} \boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta_0)\boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta_0)^\top$ is positive definite, where $\boldsymbol \theta_0$ denotes the true parameter value.
+
+Suppose also that $\partial \boldsymbol \psi(\boldsymbol y, \boldsymbol \theta) / \partial \boldsymbol \theta$ and $\partial^2 \boldsymbol \psi(\boldsymbol y, \boldsymbol \theta) / \partial \boldsymbol \theta \partial \boldsymbol \theta^\top$ are continuous in a neighborhood of $\boldsymbol \theta_0$ and that, in this neighborhood, $||\boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta)||^3$, $||\partial \boldsymbol \psi(\boldsymbol y, \boldsymbol \theta) / \partial \boldsymbol \theta||$ and $||\partial^2 \boldsymbol \psi(\boldsymbol y, \boldsymbol \theta) / \partial \boldsymbol \theta \partial \boldsymbol \theta^\top||$ are bounded by an integrable function $\Psi(\boldsymbol Y_1)$.
+
+Finally, suppose the $r \times b$ matrix $D_{\boldsymbol \psi} \equiv \text{E} \partial \boldsymbol \psi(\boldsymbol y, \boldsymbol \theta) / \partial \boldsymbol \theta$ has full column rank $b$.
+
+Then, as $n \rightarrow \infty$,
+
+(i) $\sqrt{n}(\hat{\boldsymbol \theta} - \boldsymbol \theta_0) \stackrel{d}{\rightarrow} N(\boldsymbol 0_b, V)$, where $V = (D_{\boldsymbol \psi}^\top \text{Var}[\boldsymbol \psi(\boldsymbol Y_1, \boldsymbol \theta_0)] D_{\boldsymbol \psi})^{-1}$.
+
+(i) If $r > b$, the asymptotic variance $V$ cannot increase if an estimating function is added.
+
+(i) To test $H_0:\boldsymbol \theta = \boldsymbol \theta_0$, we may use $-2\log R_n(\boldsymbol \theta_0)$ and when $H_0$ is true,
+    $$
+    -2\log R_n(\boldsymbol \theta_0) \stackrel{d}{\rightarrow} \chi^2_b
+    $$
+    
+    <br/><br/><br/>
+    
+(i) If $r > b$, to test $H_0:\text{E}\psi(\boldsymbol Y_1, \boldsymbol \theta) = \boldsymbol 0_r$ holds for some $\boldsymbol \theta$, we may use 
+    $$
+    -2\log \frac{L_n(\hat{\boldsymbol \theta})}{\prod\limits_{i = 1}^n (1/n)} = \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad 
+    $$
+    and when $H_0$ is true this quantity converges in distribution to $\chi^2_{r - b}$.
+    
+    <br/><br/><br/>
+
+(i) To test the profile assumption $H_0: \boldsymbol \theta_1 = \boldsymbol \theta_1^0 \in \mathbb{R}^q$, we can use the profile EL ratio $-2\log R_n(\boldsymbol \theta_1^0)$ and , when $H_0$ is true, $-2\log R_n(\boldsymbol \theta_1^0) \stackrel{d}{\rightarrow} \chi^2_q$.
+
+\newpage
+
+# Computation
+
+Technically, for a given value of $\boldsymbol \theta$, define $L_n(\boldsymbol \theta | \boldsymbol Y) = 0$ if
+$$
+\mathcal{A}_n(\boldsymbol \theta) = \left\{\prod\limits_{i = 1}^n p_i: p_i \mapsto \boldsymbol Y_i, \quad \sum\limits_{i = 1}^n p_i = 1, \quad \sum\limits_{i = 1}^n \boldsymbol p_i \boldsymbol \psi(\boldsymbol Y_i, \boldsymbol \theta) = \boldsymbol 0_r\right\}
+$$
+is empty.
+
+<br/><br/><br/><br/>
+
+If $\boldsymbol 0_r$ is in the interior convex hull of $\{\psi(\boldsymbol Y_i, \boldsymbol \theta)\}_{i = 1}^n$, then $\mathcal{A}_n(\boldsymbol \theta)$ will not be empty.
+
+\newpage
+
+
+The supremum in the definition of $L_n(\boldsymbol \theta | \boldsymbol Y)$ looks nasty, but the form simplifies if $L_n(\boldsymbol \theta | \boldsymbol Y) > 0$ for a given $\boldsymbol \theta \in \mathbb{R}^b$. To see this, fix $\boldsymbol \theta$ and let
+$$
+\mathcal{B}_n(\boldsymbol \theta) =  \left\{(p_1, \dots, p_n): p_i \ge 0, \quad \sum\limits_{i = 1}^n p_i = 1, \quad \sum\limits_{i = 1}^n \boldsymbol p_i \boldsymbol \psi(\boldsymbol Y_i, \boldsymbol \theta) = \boldsymbol 0_r\right\} \subset [0, 1]^n
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+To maximize $\prod\limits_{i = 1}^n p_i$ on $\mathcal{B}_n(\boldsymbol \theta)$ and find $(p_1^*, \dots, p_n^*)$, use Lagrange multipliers $a \in \mathbb{R}$ and $\boldsymbol \lambda \in \mathbb{R}^r$ and maximize
+$$
+f(p_1, \dots, p_n, a, \boldsymbol \lambda) = \log \prod\limits_{i = 1}^n p_i + a\left(1 - \sum\limits_{i = 1}^n p_i\right) - n\boldsymbol \lambda^\top\left(\sum\limits_{i = 1}^n \boldsymbol p_i \boldsymbol \psi(\boldsymbol Y_i, \boldsymbol \theta)\right)
+$$
+over $p_i \in [0,1], a \in \mathbb{R}$, and $\boldsymbol \lambda \in \mathbb{R}^r$.
+
+\newpage 
+
+Take derivatives & set to zero:

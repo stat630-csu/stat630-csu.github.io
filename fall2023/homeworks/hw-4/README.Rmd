@@ -1,0 +1,21 @@
+# hw-4
+
+Homework 4 in STAT630: Advanced Statistical Data Analysis @ CSU
+
+## Assignment
+
+1. **[12 pts]** (Boos and Stephanski 2.48) Suppose that the data $Y_1, \dots, Y_n$ are assumed to come from a mixture of two binomial distributions. Thus,
+    $$
+    f(y; p, \theta_1, \theta_2) = p {n \choose y} \theta_1^y(1 - \theta_1)^{n-y} + (1 - p) {n \choose y} \theta_2^y(1 - \theta_2)^{n-y}.
+    $$
+    Find an expression for $Q(p, \theta_1, \theta_2, p^v, \theta_1^v, \theta_2^v)$ and the updating formulas. (**Hint:** to get the updating formulas, take partial derivatives of $Q$ with respect to $p, \theta_1$, and $\theta_2$ and proceed as usual.)
+
+2. Synthetic data are available [here](./mixture.csv). This is synthetic data which comes from a mixture of three bivariate Gaussian distributions.
+
+    a) **[20 pts]** Write your own code to perform the EM algorithm to fit a model to this data. As we learned in class, a "useful" solution is found by finding a local maximum, as the global maximum occurs at the boundary of the parameter space. Turn in your plan (psuedocode), including all derived quantities, as well as your actual code, and report parameter estimates.
+    
+    b) **[10 pts]** Use the R package `mclust` to find a "useful" solution. You should download the package, and familiarize yourself with what it does. The package will likely fit more than one model. Briefly explain the best fitting model for 3 mixture components and report parameter estimates.
+    
+    c) **[5 pts]** Using either your results from a) or b), produce a plot which shows to your boss (who doesn't know about the EM algorithm or coding) that your solution is useful.
+    
+    d) **[3 pts]** Use the `mclust` package to choose the number of mixture components (pretending that you don't know that the number of mixture components is three). What number of components does it choose?

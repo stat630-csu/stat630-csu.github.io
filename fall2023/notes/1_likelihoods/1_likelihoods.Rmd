@@ -1,0 +1,940 @@
+---
+title: "Likelihoods"
+output:
+  pagedown::html_paged:
+    # change to true for a self-contained document, but it'll be a litte slower for Pandoc to render
+    css: ["../style/my-style-page.css", "default-fonts", "default-page", "default"]
+    self_contained: true
+    number_sections: true
+---
+
+```{r, echo = FALSE, message = FALSE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(broom)
+set.seed(100)
+
+theme_set(theme_bw())
+knitr::opts_chunk$set(fig.height = 3)
+```
+
+History of the course:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+## Outline
+
+
+# Likelihood Construction and Estimation
+
+<br/><br/><br/><br/><br/>
+
+Why do Statisticians love likelihood-based estimation?
+
+1. <br/><br/><br/><br/>
+
+2. <br/><br/><br/><br/>
+
+3. <br/><br/><br/><br/>
+
+4. <br/><br/><br/><br/>
+
+Downsides?
+
+1. <br/><br/><br/><br/>
+
+
+1. <br/><br/>
+
+## Introduction
+
+**Definition: ** Suppose random variables $\boldsymbol Y = (Y_1, \dots Y_n)^\top$ has joint density or probability mass function $f_\boldsymbol Y(\boldsymbol y, \boldsymbol \theta)$ where $\boldsymbol \theta = (\theta_1, \dots, \theta_b)$. Then the *likelihood function* is
+$$
+L(\boldsymbol \theta | \boldsymbol Y) = f_\boldsymbol Y(\boldsymbol Y, \boldsymbol \theta).
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Key concept: ** In all situations, the likelihood is the joint density of the observed data to be analyzed.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Notation
+
+Given $\boldsymbol y$, note that $L(\boldsymbol \theta | \boldsymbol y): \mathbb{R}^b \rightarrow \mathbb{R}$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Generally, we optimize $\ell(\boldsymbol \theta) = \log L(\boldsymbol \theta | \boldsymbol y)$.
+
+<br/><br/><br/><br/>
+
+How?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example:** Suppose we have $Y_1, \dots Y_n \stackrel{iid}{\sim} \text{Exp}(\lambda)$. The likelihood function is defined as
+
+<br/><br/><br/><br/>
+
+```{r}
+# likelihood simulation
+n <- 10
+lambda <- 1
+
+# plot of exponential(lambda) density
+data.frame(x = seq(0, 8, .01)) |>
+  mutate(f = dexp(x, rate = lambda)) |>
+  ggplot() +
+  geom_line(aes(x, f))
+```
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r}
+# define likelihood
+loglik <- function(lambda, data)
+{
+	lik <- prod(dexp(data, rate = lambda))
+	loglik <- sum(dexp(data, rate = lambda, log = T))
+	
+	out <- data.frame(lik = lik, loglik = loglik)
+	return(out)
+}	
+
+# simulate data
+data <- rexp(n = n, rate = lambda)
+
+# plot likelihood and loglikelihood
+data.frame(lambda = seq(0, 3, by = .01)) |>
+  rowwise() |>
+  mutate(loglik = loglik(lambda, data)) |>
+  unnest(cols = c(loglik)) |>
+  pivot_longer(-lambda, names_to = "func", values_to = "vals") |>
+  ggplot() +
+  geom_vline(aes(xintercept = 1 / mean(data)), lty = 2) + # max likelihood estimate is 1/mean
+  geom_line(aes(lambda, vals)) +
+  facet_wrap(~func, scales = "free")
+
+```
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+The likelihood function is random!
+
+```{r, out.width="33%", fig.show='hold', fig.height=4, fig.width=4}
+for(i in seq_len(3)) {
+  # simulate data
+  data <- rexp(n = n, rate = lambda)
+  
+  # plot likelihood and loglikelihood
+  data.frame(lambda = seq(0, 3, by = .01)) |>
+    rowwise() |>
+    mutate(loglik = loglik(lambda, data)) |>
+    unnest(cols = c(loglik)) |>
+    ggplot() +
+    geom_vline(aes(xintercept = 1 / mean(data)), lty = 2) + # max likelihood estimate is 1/mean
+    geom_line(aes(lambda, loglik)) +
+    theme(text = element_text(size = 20)) -> p ## make legible in notes
+  
+    print(p)
+}
+
+```
+
+<br/><br/>
+
+**Your Turn:** What is the effect of sample size on the log-likelihood function? Make a plot showing the log-likelihood function that results from $n = 10$ vs. $n = 100$ with corresponding MLE.
+
+<br/><br/><br/><br/><br/><br/>
+
+## Construction
+
+The use of the likelihood function in parameter estimation is easiest to understand in the case of discrete iid random variables.
+
+### Discrete IID Random Variables
+
+Suppose each of the $n$ random variables in the sample $Y_1, \dots, Y_n$ have probability mass function $f(y; \boldsymbol \theta) = P_\boldsymbol \theta(Y_1 = y), y = y_1, y_2, \dots$. The likelihood is then defined as:
+$$
+L(\boldsymbol \theta | \boldsymbol Y) = \text{ joint density of observed random variables}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In other words, 
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Fetal Lamb Movements): ** Data on counts of movements in five-second intervals of one fetal lamb ($n = 240$ intervals:)
+
+```{r, echo=FALSE}
+data.frame(no_movement = seq(0, 7),
+           count = c(182, 41, 12, 2, 2, 0, 0, 1)) |>
+  t() -> lambs
+rownames(lambs) <- c("No. of Movements", "Count")
+
+lambs |>
+  kable(booktabs = TRUE)
+```
+
+Assume a Poisson model: $P(Y = y) = f_Y(y; \lambda) = \frac{\exp(-\lambda)\lambda^y}{y!}$. Then the likelihood is
+
+<br/><br/><br/><br/><br/><br/>
+
+Equating the derivative of the loglikelihood with respect to $\lambda$ to zero and solving results in the MLE
+
+$$
+\hat{\lambda}_\text{MLE} = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+<br/><br/>
+
+This is the best we can do with this model. But is it good?
+
+```{r, echo = FALSE}
+data.frame(no_movement = seq(0, 7),
+           count = c(182, 41, 12, 2, 2, 0, 0, 1)) -> lambs_model_df
+
+lambda_hat <- lambs_model_df |>
+  mutate(exp_count = no_movement * count) |>
+  summarise(lambda_hat = sum(exp_count) / sum(count)) |>
+  pull(lambda_hat)
+
+lambs_model_df |>
+  rowwise() |>
+  mutate(Model = dpois(no_movement, lambda_hat) * sum(lambs_model_df$count)) |>
+  rename(Observed = count) |>
+  pivot_longer(-no_movement, names_to = "type", values_to = "count") |>
+  ggplot() +
+  geom_bar(aes(no_movement, count, fill = type), position = "dodge", stat = "identity") +
+  xlab("# of movements") +
+  scale_fill_discrete("")
+              
+
+```
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Multinomial Likelihoods
+
+The multinomial distribution is a generalization of the binomial distribution where instead of 2 outcomes (success or failure), there are now $k \ge 2$ outcomes.
+
+<br/><br/><br/><br/>
+
+The probability mass function is
+
+<br/><br/><br/><br/>
+
+For $N_1, \dots, N_k, N_i =$ the number of balls in $i^\text{th}$ urn,
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The maximum likelihood estimator of $p_i$:
+
+<br/><br/><br/><br/><br/><br/><br/>
+
+More interesting multinomial likelihoods arise when the $p_i$ are modeled as a function of a lesser number of parameters $\theta_1, \dots, \theta_m$, $m < k - 1$.
+
+**Example (Capture-Recapture):** To estimate fish survival during a specific length of time (e.g., one month), a common approach is to use a removal design.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+
+### Continuous IID Random Variables
+
+Recall: the likelihood is the joint density of data to be analyzed.
+
+**Example (Hurricane Data):** For $36$ hurricanes that had moved far inland on the East Coast of the US in 1900-1969, maximum 24-hour precipitation levels during the time they were over mountains.
+
+```{r echo=FALSE}
+hurr_rain <- c(31, 2.82, 3.98, 4.02, 9.5, 4.5, 11.4, 10.71, 6.31, 4.95, 5.64, 5.51, 13.40, 9.72, 6.47, 10.16, 4.21, 11.6, 4.75, 6.85, 6.25, 3.42, 11.8, 0.8, 3.69, 3.10, 22.22, 7.43, 5, 4.58, 4.46, 8, 3.73, 3.5, 6.2, 0.67)
+
+ggplot() + 
+  geom_histogram(aes(hurr_rain), binwidth = .5) +
+  xlab("Precipitation Levels")
+```
+
+We model the precipitation levels with a gamma distribution, which has density
+$$
+f(y; \alpha, \beta) = \frac{1}{\Gamma(\alpha) \beta^\alpha} y^{\alpha - 1}\exp(-y/\beta), \quad y > 0, \alpha, \beta > 0.
+$$
+This leads to the likelihood
+
+<br/><br/><br/><br/><br/>
+
+Of course, this cannot be interpreted as a probability because
+
+<br/><br/><br/><br/>
+
+To get a probability, need to go from a density to a measure.
+
+<br/><br/><br/><br/>
+
+But it may be useful to think of the value of the likelihood as being proportional to a probability.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+More formally, begin with the definition of a derivative
+
+$$
+g'(x) = \lim\limits_{h \rightarrow0^+} \frac{g(x + h) - g(x - h)}{2h}.
+$$
+
+Let $F$ be the cumulative distribution function of a continuous random variable $Y$, then (if the derivative exists)
+
+$$
+f(y) =  \lim\limits_{h \rightarrow0^+} \frac{F(x + h) - F(x - h)}{2h} = \qquad \qquad \qquad \qquad \qquad
+$$
+
+If we substitute this definition of a density into the definition of the likelihood
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Compare this to the iid discrete case:
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Hurricane Data, Cont'd):** Recall with a gamma model, the likelihood for this example is
+$$
+L(\boldsymbol \theta | \boldsymbol Y) = \{\Gamma(\alpha)\}^{-n} \beta^{-n\alpha} \left\{\prod Y_i\right\}^{\alpha - 1} \exp\left(-\sum y_i/\beta\right),
+$$
+and log-likelihood
+$$
+\ell(\boldsymbol \theta) = \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+$$
+
+```{r, fig.height=2}
+## loglikelihood function
+neg_gamma_loglik <- function(theta, data) {
+  -sum(log(dgamma(data, theta[1], scale = theta[2])))
+}
+
+## maximize
+mle <- nlm(neg_gamma_loglik, c(1.59, 4.458), data = hurr_rain)
+mle$estimate
+
+## Gamma QQ plot
+data.frame(theoretical = qgamma(ppoints(hurr_rain), mle$estimate[1], scale = mle$estimate[2]),
+           actual = sort(hurr_rain)) |>
+  ggplot() +
+  geom_abline(aes(intercept = 0, slope = 1), colour = "grey") +
+  geom_point(aes(theoretical, actual)) +
+  xlab("Gamma percentiles") + ylab("Ordered values")
+  
+```
+
+### Mixtures of Discrete and Continuous RVs
+
+Some data $Y$ often have a number of zeros and the amounts greater than zero are best modeled by a continuous distribution. 
+
+<br/>
+
+Ex:
+
+<br/>
+
+In other words, they have positive probability of taking a value of exactly zero, but continuous distribution otherwise.
+
+<br/><br/><br/>
+
+A sensible model would assume $Y_i$ are iid with cdf
+$$
+F_Y(y; p, \boldsymbol \theta) = \begin{cases}
+0 & y = 0 \\
+p & y = 0 \\
+p + (1 - p)F_T(y; \boldsymbol \theta) & y > 0
+\end{cases}
+$$
+where $0 < p \le 1$ is $P(Y = 0)$ and $F_T(y; \boldsymbol \theta)$ is a distribution function for a continuous positive random variable.
+
+Another way to write this:
+
+<br/><br/><br/><br/><br/>
+
+How to go from here to get a likelihood?
+
+
+<br/><br/><br/><br/><br/>
+
+One approach: let $n_0$ be the number of zeroes in the data and $m = n - n_0$ be the number of non-zero $Y_i$. This leads to an intuitive way to contruct the likelihood for iid $Y_1, \dots, Y_n$ distributed according to the above distribution:
+$$
+L(\boldsymbol \theta | \boldsymbol Y) = \lim\limits_{h \rightarrow 0^+} \left(\frac{1}{2h}\right)^m \prod\limits_{i = 1}^n\{F_Y(Y_i + h; p, \boldsymbol \theta) - F_Y(Y_i - h; p, \boldsymbol \theta)\}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Feels a little arbitrary in how we are defining different weights on our likelihood for discrete and continuous parts.
+
+<br/><br/>
+
+Turns out, it doesn't matter! (Need some STAT 630/720 to see why.)
+
+**Definition (Absolute Continuity)** On $(\mathbb{X}, \mathcal{M})$, a finitely additive set function $\phi$ is *absolutely continuous* with respect to a measure $\mu$ if $\phi(A) = 0$ for each $A \in \mathcal{M}$ with $\mu(A) = 0$. We also say $\phi$ is *dominated* by $\mu$ and write $\phi \ll \mu$. If $\nu$ and $\mu$ are measures such that $\nu \ll \mu$ and $\mu \ll nu$ then $\mu$ and $\nu$ are *equivalent*.
+
+<br/><br/><br/><br/>
+
+**Theorem (Lebesgue-Randon-Nikodym)** Assume that $\phi$ is a $\sigma$-finite countably additive set function and $\mu$ is a $\sigma$-finite measure. There exist unique $\sigma$-finite countably additive set functions $\phi_s$ and $\phi_{ac}$ such that $\phi = \phi_{ac} + \phi_s \ll \mu$, $\phi_s$ and $\mu$ are mutually singular and there exists a measurable extended real valued function $f$ such that
+$$
+\phi_{ac}(A) = \int_A f d\mu, \qquad \text{ for all } A \in \mathcal{M}.
+$$
+If $g$ is another such function, then $f = g$ a.e. wrt $\mu$. If $\phi \ll \mu$ then $\phi(A) = \int_Af d\mu$ for all $A \in \mathcal{M}$.
+
+<br/>
+
+**Definition (Radon-Nikodym Derivative)** $\phi = \phi_{ac} + \phi_s$ is called the *Lebesgue decomposition*. If $\phi \ll \mu$, then the density function $f$ is called the *Radon-Nikodym derivative* of $\phi$ wrt $\mu$.
+
+<br/>
+
+So what?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Proportional Likelihoods
+
+Likelihoods are equivalent for point estimation as long as they are proportional and the constant of proportionality does not depend on unknown parameters.
+
+Why?
+
+Consider if $Y_i, i = 1, \dots, n$ are iid continuous with density $f_Y(y ; \boldsymbol \theta)$ and $X_i = g(Y_i)$ where $g$ is increasing and continuously differentiable. Because $g$ is one-to-one, we can construct $Y_i$ from $X_i$ and vice versa.
+
+<br/><br/><br/><br/>
+
+More formally, the density of $X_i$ is $f_X(x; \boldsymbol \theta) = f_Y(h(x); \boldsymbol \theta) h'(x)$, where $h = g^{-1}$, and
+$$
+L(\boldsymbol \theta | \boldsymbol X) = \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Likelihood Principle):** Consider data from two different sampling plans:
+
+1. A binomial experiment with $n = 12$. Let $Y_i = 1$ if $i^{\text{th}}$ trial is a success and $0$ otherwise.
+    $$
+    L_1(p | \boldsymbol Y) = {12 \choose S} p^S (1 - p)^{12 - S}, \text{ where } S = \sum\limits_{i = 1}^n Y_i
+    $$
+2. A negative binomial experiment, i.e. run the experiment until three zeroes are obtained.
+    $$
+    L_2(p | \boldsymbol Y) = {S + 2 \choose S} p^S (1 - p)^3.
+    $$
+The ratio of these likelihoods is
+$$
+\frac{L_1(p | \boldsymbol Y)}{L_2(p | \boldsymbol Y)} = \qquad \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+Suppose $S = 9$. Is all inference equivalent for these likelihoods? Debatable.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**The likelihood principle** states all the information about $\boldsymbol \theta$ from an experiment is contained in the actual observation $\boldsymbol y$. Two likelihood functions for $\boldsymbol \theta$ (from the same or different experiments) contain the same information about $\boldsymbol \theta$ is they are proportional.
+
+### Empirical Distribution Function as MLE {.page-break-before}
+
+Recall the empirical cdf:
+
+Suppose $y_{(1)} \le y_{(2)} \le \cdots \le y_{(n)}$ are the order statistics of an iid sample from an unknown distribution function $F_Y$. Our goal is to estimate $F_Y$.
+
+$$
+\hat{F}_Y(y) = \frac{1}{n} \sum\limits_{i = 1}^n \mathbb{I}(y \ge y_{(i)})
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Is this a "good" estimator of $F_Y$?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Yes, because it's MLE.
+
+Suppose $Y_1, \dots, Y_n$ are iid with distribution function $F(y)$. Here $F(y)$ is the unknown parameter.
+
+<br/><br/><br/><br/><br/><br/><br/>
+
+An approximate likelihood for $F$ is
+
+$$
+L_h(F | \boldsymbol Y) = \prod\limits_{i = 1}^n \{F(Y_i + h) - F(Y_i - h)\}
+$$
+
+### Censored Data {.page-break-before}
+
+Censored data occur when the value is only partially known. This is different from *truncation*, in which the data does not include any values below (or above) a certain limit. 
+
+For example, we might sample only hourseholds that have an income above a limit, $L_0$. If all incomes have distribution $F(x; \boldsymbol \theta)$, then for $y > L_0$,
+
+<br/>
+$$
+P(Y_1 \le y | Y_1 > L_0) = \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad 
+$$
+<br/>
+The likelihood is then
+
+<br/><br/><br/><br/><br/><br/><br/>
+
+#### Type I Censoring
+
+Suppose a random variable $X$ is normally distributed with mean $\mu$ and variance $\sigma^2$, but whenever $X \le 0$, all we observe is that it is less than or equal to $0$. If the sample is set to $0$ in the censored cases, then define
+$$
+Y = \begin{cases}
+0 & \text{ if } X \le 0 \\
+X & \text{ if } X > 0.
+\end{cases}
+$$
+The distribution function of $Y$ is
+
+<br/><br/><br/><br/><br/><br/><br/>
+
+Suppose we have a sample $Y_1, \dots, Y_n$ and let $n_0$ be the number of sample values that are $0$. Then $m = n - n_0$ and
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+We might have censoring on the left at $L_0$ and censoring on the right at $R_0$, but observe all values of $X$ between $L_0$ and $R_0$. Suppose $X$ has density $f(x; \boldsymbol \theta)$ and distribution function $F(x; \boldsymbol \theta)$ and
+$$
+Y_i = \begin{cases}
+L_0 & \text{ if } X_i \le L_0 \\
+X_i & \text{ if } L_0 < X_i < R_0 \\
+R_0 & \text{ if } X_i \ge R_0 \\
+\end{cases}
+$$
+
+If we let $n_L$ and $n_R$ be the number of $X_i$ values $\le L_0$ and $\ge R_0$ then the likelihood of the observed data $Y_1, \dots, Y_n$ is
+
+<br/><br/><br/><br/><br/><br/>
+
+We could also let each $X_i$ be subject to its own censoring values $L_i$ and $R_i$. For the special case of right censoring, define $Y_i = \min(X_i, R_i)$. In addition, define $\delta_i = \mathbb{I}(X_i \le R_i)$. Then the likelihood can be written as
+
+<br/><br/><br/><br/><br/>
+
+**Example (Equipment failure times):** Pieces of equipment are regularly checked for failure (but started at different times). By a fixed date (when the study ended), three of the items had not failed and therefore were censored.
+
+```{r, echo=FALSE}
+failure <- data.frame(y = c(2, 72, 51, 50, 33, 27, 14, 24, 4, 21),
+                      delta = c(1, 0, 1, 0, 1, 1, 1, 1, 1, 0))
+
+failure |>
+  t() |>
+  kable()
+```
+Suppose failure times follow an exponential distribution $F(x; \sigma) = 1 - \exp(-x/\sigma), x \ge 0$. Then
+$$
+L(\sigma|\boldsymbol Y) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+#### Random Censoring {.page-break-before}
+
+So far we have considered censoring times to be fixed. This is not required.
+
+<br/><br/><br/><br/>
+
+This leads to random censoring times, e.g. $R_i$, where we assume that the censoring times are independent of $X_1, \dots, X_n$ and iid with distribution function $G(t)$ nd density $g(t)$.
+
+Let's consider the contributions to the likelihood:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+which results in
+
+$$
+L(\boldsymbol \theta | \boldsymbol Y, \boldsymbol \delta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+## Likelihoods for Regression Models {.page-break-before}
+
+We will start with linear regression and then talk about more general models.
+
+### Linear Model
+
+Consider the familiar linear model
+$$
+Y_i = \boldsymbol x_i^\top \boldsymbol \beta + \epsilon_i, \qquad i =1, \dots, n,
+$$
+where $\boldsymbol x_1, \dots, \boldsymbol x_n$ are known nonrandom vectors.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+For likelihood-based estimation, 
+
+$$
+L(\boldsymbol \beta, \sigma | \{Y_i, \boldsymbol x_i\}_{i = 1}^n) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+What do you do when $\epsilon_i$ are not Gaussian?
+
+<br/><br/><br/><br/><br/>
+
+**Example (Venice sea levels):** The annual maximum sea levels in Venice for 1931--1981 are :
+
+```{r echo = FALSE, message=FALSE, warning=FALSE}
+venice <- data.frame(year = seq(1931, 1981),
+                     sea_level = c(102, 78, 121, 116, 115, 147, 119, 114, 89, 102, 99, 91, 97, 106, 105, 136, 126, 132, 104, 117, 151, 116, 107, 112, 97, 95, 119, 124, 118, 145, 122, 114, 118, 107, 110, 194, 138, 144, 138, 123, 122, 120, 114, 96, 125, 124, 120, 132, 166, 134, 138))
+
+ggplot(venice) +
+  geom_point(aes(year, sea_level)) +
+  geom_smooth(aes(year, sea_level), method = "lm", se = FALSE)
+
+```
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Additive Errors Nonlinear Model
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Generalized Linear Models
+
+<br/><br/><br/><br/>
+
+Imagine an experiment where individual mosquitos are given some dosage of pesticide. The response is whether the mosquito lives or dies. The data might look something like:
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Goal:** Model the relationship between the predictor and response.
+
+<br/><br/><br/>
+
+**Question:** What would a curve of best fit look like?
+
+<br/><br/><br/>
+
+**Refined Goal:**
+
+Let's build a sensible model.
+
+**Step 1:** Find a function that behaves the way we want.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r, out.width="50%", fig.show = "hold"}
+# understanding the logistic function
+# first, theta just equals x
+x <- seq(-7, 7, .1)
+theta <- x
+y <- exp(theta)/(1 + exp(theta))
+ggplot() + geom_line(aes(x, y))
+
+# now, let theta be a linear function of x
+theta <- 1 + 3*x  
+y <- exp(theta)/(1 + exp(theta))
+ggplot() + geom_line(aes(x, y))
+```
+
+**Step 2:** Build a stochastic mechanism to relate to a binary response.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Step 3:** Put Step 1 and Step 2 together.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Fitting our model: Does OLS make sense?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Consider the likelihood contribution.
+
+$$
+L_i(p_i|Y_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+So the log-likelihood contribution is
+
+$$
+\ell_i(p_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+Recall, we said $p_i = \frac{\exp(\theta_i)}{1 + \exp(\theta_i)}$ was sensible.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Which gives us,
+
+$$
+\ell_i(\theta_i) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/>
+
+So the log-likelihood is
+
+$$
+\ell(\theta_1, \dots, \theta_n) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+To optimize?
+
+```{r}
+## data on credit default
+data("Default", package = "ISLR") 
+head(Default)
+
+## fit model with ML
+m0 <- glm(default ~ balance, data = Default, family = binomial)
+tidy(m0) |> kable()
+glance(m0) |> kable()
+
+## plot the curve
+x_new <- seq(0, 2800, length.out = 200)
+theta <- m0$coefficients[1] + m0$coefficients[2]*x_new
+p_hat <- exp(theta)/(1 + exp(theta))
+
+ggplot() +
+  geom_point(aes(balance, as.numeric(default) - 1), alpha = 0.5, data = Default) +
+  geom_line(aes(x_new, p_hat), colour = "blue") + 
+  ylab("Probability of Defaulting")
+
+```
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In general, a GLM is three pieces:
+
+1. The random component
+
+<br/><br/><br/><br/>
+
+2. The systemic component
+
+<br/><br/><br/><br/>
+
+3. A linear predictor
+
+<br/><br/><br/><br/>
+
+Remarks:
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Poisson regression):**
+
+<br/><br/><br/><br/>
+
+Consider a general family of distributions:
+
+$$
+\log f(y_i; \theta_i, \phi) = \frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)} + c(y_i, \phi).
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Normal model):**
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+We can learn something about this distribution by considering it's mean and variance. Because we don't have an explicit form of the density, we rely on two facts:
+
+1. $\text{E}\left[\frac{\partial \log f(Y_i; \theta_i, \phi)}{\partial \theta_i}\right] = 0.$
+
+<br/><br/><br/><br/>
+
+2.  $\text{E}\left[\frac{\partial^2 \log f(Y_i; \theta_i, \phi)}{\partial \theta_i^2}\right] + \text{E}\left[\left(\frac{\partial \log f(Y_i; \theta_i, \phi)}{\partial \theta_i}\right)^2\right] = 0.$
+
+<br/><br/><br/><br/>
+
+For $\log f(y_i; \theta_i, \phi) = \frac{y_i\theta_i - b(\theta_i)}{a_i(\phi)} + c(y_i, \phi)$,
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Bernoulli model):**
+$$
+f(y_i; p_i) = p_i^{y_i}(1 - p_i)^{1 - y_i}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Finally, back to modelling. Our **goal** is to build a relationship between the mean of $Y_i$ and covariates $\boldsymbol x_i$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Bernoulli model, cont'd):**
+
+
+## Marginal and Conditional Likelihoods {.page-break-before}
+
+Consider a model which has $\boldsymbol \theta = (\boldsymbol \theta_1, \boldsymbol \theta_2)$, where $\boldsymbol \theta_1$ are the parameters of interest and $\boldsymbol \theta_2$ are nuisance parameters.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+One way to improve estimation for $\boldsymbol \theta_1$ is to find a one-to-one transformation of the data $\boldsymbol Y$ to $(\boldsymbol V, \boldsymbol W)$ such that either
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+The key feature is that one component of each contains only the parameter of interest.
+
+<br/>
+
+**Example (Neyman-Scott problem):** Let $Y_{ij}, i = 1, \dots, n, j = 1, 2$ be intependent normal random variables with possible different means $\mu_i$ but the same variance $\sigma^2$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Our goal is to estimate $\sigma^2$. Should we be able to?
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Following the usual arguments,
+
+$$
+\hat{\mu}_{i, \text{MLE}} = \frac{Y_{i1} + Y_{i2}}{2} \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\\
+\hat{\sigma}_{\text{MLE}}^2 = \frac{1}{2n}\sum\limits_{i = 1}^n \sum\limits_{j = 1}^2 (Y_{ij} - \hat{\mu}_{i, \text{MLE}})^2 \quad \qquad\qquad\qquad\qquad\qquad
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+$$
+\text{E}[\hat{\sigma}_{\text{MLE}}^2] = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+A reworking of the data seems more promising. Let,
+$$
+V_i = \frac{Y_{i1} - Y_{i2}}{\sqrt{2}} \qquad \text{and}\qquad W_i = \frac{Y_{i1} + Y_{i2}}{\sqrt{2}}
+$$
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+For conditional likelihoods, we can often exploit the existence of sufficient statistics for the nuisance parameters under the assumption that the parameter of interest is known.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Example (Exponential Families):** The structure of exponential families is such that it is often possible to exploit their properties to eliminated nuisance parameters. Let $Y$ have a density of the form
+$$
+f(y; \boldsymbol \eta) = h(y)\exp\left\{\sum\limits_{i = 1}^s \eta_i T_i(y) - A(\boldsymbol \eta)\right\},
+$$
+then
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Thus, exponential families often provide an automatic procedure for finding $\boldsymbol W$ and $\boldsymbol U$.
+
+**Example (Logistic Regression):** For binary $Y_i$, the standard logistics regression model is
+$$
+P(Y_i = 1) = p_i(\boldsymbol x_i, \boldsymbol \beta) = \frac{\exp(\boldsymbol x_i^\top\boldsymbol \beta)}{1 + \exp(\boldsymbol x_i^\top\boldsymbol \beta)}
+$$
+and the likelihood is
+$$
+L(\boldsymbol \beta | \boldsymbol Y, \boldsymbol X) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+## The Maximum Likelihood Estimator and the Information Matrix {.page-break-before}
+
+We have now talked about how to construct likelihoods in a variety of settings, now we can use those constructions to formalize how we make inferences about model parameters.
+
+<br/><br/><br/><br/>
+
+Recall the score function
+
+$$
+S(\boldsymbol Y, \boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Generally, the maximum likelihood estimator $\hat{\boldsymbol \theta}_{\text{MLE}}$ is the value of $\boldsymbol \theta$ where the maximum (over the parameter space $\Theta$) of $L(\boldsymbol \theta | \boldsymbol Y)$ is attained.
+
+<br/><br/><br/><br/>
+
+Under the assumption that the log-likelihood is continuously differentiable, then 
+
+<br/><br/><br/><br/>
+
+But not always (?!).
+
+**Example (Exponential threshold model):** Suppose that $Y_1, \dots, Y_n$ are iid from the exponential distribution with a threshold parameter $\mu$,
+$$
+f(y; \mu) = \begin{cases}
+\exp\{-(y - \mu)\} & \mu < y < \infty \\
+0 & \text{otherwise,}
+\end{cases}
+$$
+for $\infty < \mu < \infty$.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+```{r, echo = FALSE}
+y <- c(2.47, 2.35, 2.23, 3.53, 2.36)
+```
+
+Consider the artificial data set $\boldsymbol y = [`r paste(y, collapse = ", ")`]$.
+
+```{r, echo = FALSE}
+lik <- function(mu, data) {
+  n <- length(data)
+  exp(-sum(data)) * exp(n * mu) * all(mu < data)
+}
+
+data.frame(mu = seq(1, 3, length.out = 1000)) |>
+  rowwise() |>
+  mutate(likelihood = lik(mu, y)) -> plot_dat
+
+ggplot() +
+  geom_line(aes(mu, likelihood), data = plot_dat |> filter(mu < 2.23)) +
+  geom_line(aes(mu, likelihood), data = plot_dat |> filter(mu >= 2.23)) +
+  geom_point(aes(2.23, lik(2.22999, y)), shape = 1, size = 1.5)
+```
+
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### The Fisher Information Matrix
+
+The Fisher information matrix $I(\boldsymbol \theta)$ is defined as the $b\times b$ matrix where
+$$
+I_{ij}(\boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+In matrix form,
+$$
+I(\boldsymbol \theta) = \qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+$$
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Fisher information facts:
+
+1. The Fisher information matrix is the variance of the score contribution.
+
+<br/><br/><br/><br/><br/><br/>
+
+2. If regularity conditions are met, 
+    $$
+    \sqrt{n}(\hat{\boldsymbol \theta}_{\text{MLE}} - \theta) \stackrel{d}{\rightarrow} \text{N}_{b}(0, I(\boldsymbol \theta)^{-1}).
+    $$
+    
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+3. If $b = 1$, then any unbiased estimator must have variance greater than or equal to $\{n I(\boldsymbol \theta)\}^{-1}$
+
+<br/><br/><br/><br/><br/><br/>
+
+4. The information matrix is related to the curvature of the log-likelihood contribution.
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+### Observed Information
+
+The information matrix is not random, but it is also not observable from the data.
+
+<br/><br/><br/><br/>
+
+Let $Y_1, \dots, Y_n$ be iid with density $f_Y(y_i; \boldsymbol \theta)$. The log likelihood is defined as
+
+<br/><br/><br/><br/><br/><br/>
+
+taking two derivatives and dividing by $n$ results in
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+**Definition: **The matrix $n\bar{I}(Y; \hat{\boldsymbol \theta}_{\text{MLE}})$ is called the sample information matrix, or the *observed information matrix*.
+
+<br/><br/><br/><br/><br/><br/><br/><br/>
+
+Why use $I(\boldsymbol \theta) = \text{E}\left[-\frac{\partial^2}{\partial \boldsymbol \theta\partial \boldsymbol \theta^\top} \log f(Y_1; \boldsymbol \theta)\right]$ as the basis for an estimator, rather than $I(\boldsymbol \theta) = \text{E}\left[\left\{\frac{\partial}{\partial \boldsymbol \theta^\top} \log f(Y_1; \boldsymbol \theta)\right\}\left\{\frac{\partial}{\partial \boldsymbol \theta} \log f(Y_1; \boldsymbol \theta)\right\}\right]$?
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+Now let's prove the asymptotic normality of the MLE (in the scalar case).
+
+
+
