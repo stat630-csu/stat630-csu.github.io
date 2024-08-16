@@ -1,6 +1,6 @@
 ---
 title: "STAT630: Advanced Statistical Data Analysis"
-author: "Fall 2023"
+author: "Fall 2024"
 date: "http://stat630-csu.github.io"
 output:
   pagedown::html_paged:
@@ -12,11 +12,11 @@ output:
 
 Dr. Andee Kaplan  
 Lectures: TTH 11am - 12:15pm Weber 223H 
-Office Hours: TH 1:30pm - 3:30pm Statistics Building 208 or by appointment  
+Office Hours: TH 3:00pm - 4:30pm Statistics Building 208 or by appointment  
 andee.kaplan@colostate.edu
 
-**Grader/TA**: Wenqin Du  
-wenqin.du@colostate.edu
+**Grader/TA**: Bingying Dai  
+bingying.dai@colostate.edu
 
 ## Catalog Description
 
@@ -37,14 +37,6 @@ The students will be able to
 5. apply statistical inference tools, e.g., estimating equations, to evaluate validity and applicability
 of data analysis results.
 6. implement statistical inference tools in their future work/research.
-
-## COVID-19
-
-**Important information for students: All students are directed to report any COVID-19 symptoms to the university immediately, as well as exposures or positive test results from a medical provider or home test.** 
-
-If you suspect you have symptoms, or if you know you have been exposed to a positive person or have tested positive for COVID, (even with a home test), you are directed to fill out the COVID Reporter (https://covid.colostate.edu/reporter/). If you know or believe you have been exposed, including living with someone known to be COVID positive, or are symptomatic, it is important for the health of yourself and others that you complete the online COVID Reporter. Do not ask your instructor to report for you. If you do not have internet access to fill out the online COVID-19 Reporter, please call (970) 491-4600. You may also report concerns in your academic or living spaces regarding COVID exposures through the COVID Reporter. You will not be penalized in any way for reporting. When you complete the COVID Reporter for any reason, the CSU Public Health office is notified. Students who report symptoms or a positive antigen test through the COVID Reporter may be directed to get a PCR test through the CSU Health Network's medical services for students.
-
-For the latest information about the University's COVID resources and information, please visit the **CSU COVID-19 site**: https://covid.colostate.edu/.
 
 ## Prerequisites
 
@@ -72,7 +64,7 @@ Students are expected to have knowledge of and have access to `R`. `R` is availa
 
 A pdf of your homework will need to be turned in to https://canvas.colostate.edu.
 
-Exam format TBD.
+Exams will be take-home. More details to follow.
 
 Any homework or exam grading dispute must be submitted in writing to me within one week after the work is returned.
 
@@ -91,6 +83,12 @@ Statisticians need to have high ethical standards. Thus, I expect each of you to
 **CSU Disability Center** Located in the TILT building. Students with both permanent and temporary limitations and health conditions (physical and mental health) are eligible for support. If you need specific accommodations in this class, please meet with me outside of class to discuss your needs as early in the class as possible.
 
 **CSU TILT** The Institute for Learning and Teaching has programs to help students improve their study habits, reduce test anxiety, learn about academic integrity, and more.
+
+## Additional CSU Policies
+
+Linked page provides policies relevant to your courses and resources to help with various challenges you may encounter.
+
+![](../images/QRCodeSyllabusResources.png){ width=30% }
 
 ## Disclaimer
 
