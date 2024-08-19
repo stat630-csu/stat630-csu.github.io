@@ -283,7 +283,7 @@ $$
 Let $F$ be the cumulative distribution function of a continuous random variable $Y$, then (if the derivative exists)
 
 $$
-f(y) =  \lim\limits_{h \rightarrow0^+} \frac{F(x + h) - F(x - h)}{2h} = \qquad \qquad \qquad \qquad \qquad
+f(y) =  \lim\limits_{h \rightarrow0^+} \frac{F(y + h) - F(y - h)}{2h} = \qquad \qquad \qquad \qquad \qquad
 $$
 
 If we substitute this definition of a density into the definition of the likelihood
@@ -320,7 +320,7 @@ data.frame(theoretical = qgamma(ppoints(hurr_rain), mle$estimate[1], scale = mle
   ggplot() +
   geom_abline(aes(intercept = 0, slope = 1), colour = "grey") +
   geom_point(aes(theoretical, actual)) +
-  xlab("Gamma percentiles") + ylab("Ordered values")
+  xlab("Gamma quantiles") + ylab("Ordered values")
   
 ```
 
@@ -357,7 +357,7 @@ How to go from here to get a likelihood?
 
 <br/><br/><br/><br/><br/>
 
-One approach: let $n_0$ be the number of zeroes in the data and $m = n - n_0$ be the number of non-zero $Y_i$. This leads to an intuitive way to contruct the likelihood for iid $Y_1, \dots, Y_n$ distributed according to the above distribution:
+One approach: let $n_0$ be the number of zeroes in the data and $m = n - n_0$ be the number of non-zero $Y_i$. This leads to an intuitive way to construct the likelihood for iid $Y_1, \dots, Y_n$ distributed according to the above distribution:
 $$
 L(\boldsymbol \theta | \boldsymbol Y) = \lim\limits_{h \rightarrow 0^+} \left(\frac{1}{2h}\right)^m \prod\limits_{i = 1}^n\{F_Y(Y_i + h; p, \boldsymbol \theta) - F_Y(Y_i - h; p, \boldsymbol \theta)\}
 $$
@@ -373,7 +373,7 @@ Turns out, it doesn't matter! (Need some STAT 630/720 to see why.)
 
 <br/><br/><br/><br/>
 
-**Theorem (Lebesgue-Randon-Nikodym)** Assume that $\phi$ is a $\sigma$-finite countably additive set function and $\mu$ is a $\sigma$-finite measure. There exist unique $\sigma$-finite countably additive set functions $\phi_s$ and $\phi_{ac}$ such that $\phi = \phi_{ac} + \phi_s \ll \mu$, $\phi_s$ and $\mu$ are mutually singular and there exists a measurable extended real valued function $f$ such that
+**Theorem (Lebesgue-Randon-Nikodym)** Assume that $\phi$ is a $\sigma$-finite countably additive set function and $\mu$ is a $\sigma$-finite measure. There exist unique $\sigma$-finite countably additive set functions $\phi_s$ and $\phi_{ac}$ such that $\phi = \phi_{ac} + \phi_s, \phi_{ac} \ll \mu$, $\phi_s$ and $\mu$ are mutually singular and there exists a measurable extended real valued function $f$ such that
 $$
 \phi_{ac}(A) = \int_A f d\mu, \qquad \text{ for all } A \in \mathcal{M}.
 $$
@@ -429,7 +429,7 @@ Suppose $S = 9$. Is all inference equivalent for these likelihoods? Debatable.
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
-**The likelihood principle** states all the information about $\boldsymbol \theta$ from an experiment is contained in the actual observation $\boldsymbol y$. Two likelihood functions for $\boldsymbol \theta$ (from the same or different experiments) contain the same information about $\boldsymbol \theta$ is they are proportional.
+**The likelihood principle** states all the information about $\boldsymbol \theta$ from an experiment is contained in the actual observation $\boldsymbol y$. Two likelihood functions for $\boldsymbol \theta$ (from the same or different experiments) contain the same information about $\boldsymbol \theta$ if they are proportional.
 
 ### Empirical Distribution Function as MLE {.page-break-before}
 
@@ -804,7 +804,7 @@ then
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
-Thus, exponential families often provide an automatic procedure for finding $\boldsymbol W$ and $\boldsymbol U$.
+Thus, exponential families often provide an automatic procedure for finding $\boldsymbol W$ and $\boldsymbol V$.
 
 **Example (Logistic Regression):** For binary $Y_i$, the standard logistics regression model is
 $$
