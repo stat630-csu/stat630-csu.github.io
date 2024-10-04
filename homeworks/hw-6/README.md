@@ -28,7 +28,7 @@ based on observations $\boldsymbol Y_1, \dots, \boldsymbol Y_n \in \mathbb{R}^d$
         $$
         (not the log-ratio) over a grid of values $\mu \in [-1, 1]$. Plot $R_n(\mu)$ as a function of $\mu$.
     
-    a) [**14 pts**] Use the EL Wilks' result to draw horizontal lines on your plot from (b) to indicate the calibration cut-offs ($\exp[-\chi^2_{1, 1 - \alpha}]$) needed for a 95% and 90% EL confidence interval for $\mu$. Then, determine and report the endpoints of both EL confidence intervals.
+    a) [**14 pts**] Use the EL Wilks' result to draw horizontal lines on your plot from (b) to indicate the calibration cut-offs ($\exp[-\chi^2_{1, 1 - \alpha} / 2]$) needed for a 95% and 90% EL confidence interval for $\mu$. Then, determine and report the endpoints of both EL confidence intervals.
     
         **Note:** For finding the interval, it can help to write a function $g(\mu)$ that computes $-2\log R_n(\mu) - \chi^2_{1,\alpha}$ and then use `uniroot` to find the two roots of $g(\cdot)$. Note that the sample mean $\overline{y}$ of the data satisfies $R(\overline{y}) = 1$ and so $\overline{y}$ is always in the interval (between the roots).
     
