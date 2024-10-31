@@ -16,7 +16,7 @@ Homework 7 in STAT630: Advanced Statistical Data Analysis @ CSU
 
 1. [**8pts**] Create a 95\% bootstrap based confidence interval using the BC (not BCa) method (write your own function to perform this). 
 
-1. [**8pts**] Create 95\% bootstrap based confidence interval using the BCa method (write your own function to perform this). 
+1. [**8pts**] Create 95\% bootstrap based confidence interval using the BCa method. 
 
 1. [**10pts**] Design a simulation experiment to assess the coverage rates of the percentile method, the basic method, the studentized, the BC method, and the BCa method for a gamma distribution with $\alpha = 5$ and $\beta = 1$.  Report the coverage rates of these methods.
 
